@@ -118,6 +118,17 @@ async def trigger_action(event_id: str, payload: dict = Body(...)):
         "currentStatus": status
     }
 
+@app.post("/api/simulate")
+async def simulate_events(payload: dict = Body(...)):
+    events = payload.get("events", [])
+    count = 0
+    for event in events:
+        if get_incident(event.get("event_id")):
+            continue
+        save_incident(event)
+        count += 1
+    return {"status": "success", "count": count}
+
 @app.delete("/api/incidents")
 async def delete_incidents():
     clear_all_incidents()

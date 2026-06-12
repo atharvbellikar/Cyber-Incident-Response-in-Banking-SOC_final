@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "total_events": 22,
+  "total_events": 30,
   "events": [
     {
       "event_id": "1f8f3115-00fc-4597-a58d-caaeb0179850",
@@ -5715,6 +5715,2078 @@
         "severity": "medium",
         "cvss_score": 5.2,
         "source_ip": "192.168.201.76",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "d5ff721b-9cb3-431b-9239-490293ad1312",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:42.380Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 22,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "ssh",
+        "result": "filtered"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:42.380Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 22,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "ssh",
+          "is_known_port": true,
+          "is_high_risk_port": true,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 302,
+          "duration_ms": 2766,
+          "bytes_per_packet": 453
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:42.380Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 22 — ssh service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 22 — ssh service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 5.4,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 22 — ssh service discovery",
+        "severity": "medium",
+        "cvss_score": 5.4,
+        "source_ip": "192.168.134.247",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "2e0b9033-f46d-4156-bf4d-838aee82ebe8",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:42.881Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 80,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "http",
+        "result": "open"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:42.880Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 80,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "http",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 301,
+          "duration_ms": 3592,
+          "bytes_per_packet": 1187
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:42.880Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 80 — http service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 80 — http service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 5.4,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 80 — http service discovery",
+        "severity": "medium",
+        "cvss_score": 5.4,
+        "source_ip": "192.168.134.247",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "66036ccf-15d0-4a53-a701-66f581c70503",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:43.381Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 443,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "https",
+        "result": "open"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:43.381Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 443,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "https",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 480,
+          "duration_ms": 2160,
+          "bytes_per_packet": 681
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:43.381Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 443 — https service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 443 — https service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 4.9,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 443 — https service discovery",
+        "severity": "medium",
+        "cvss_score": 4.9,
+        "source_ip": "192.168.134.247",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "55b13ed2-62d7-4ef3-a41b-3468f8a4c57b",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:43.881Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 3306,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "mysql",
+        "result": "filtered"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:43.881Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 3306,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "unknown",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 324,
+          "duration_ms": 1275,
+          "bytes_per_packet": 1405
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:43.881Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 3306 — mysql service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 3306 — mysql service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 6.1,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 3306 — mysql service discovery",
+        "severity": "medium",
+        "cvss_score": 6.1,
+        "source_ip": "192.168.134.247",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "b3a3a75c-4b3d-40de-aaf0-e1180bc19628",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:44.381Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 5432,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "postgres",
+        "result": "closed"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:44.381Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 5432,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "unknown",
+          "is_known_port": false,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 67,
+          "duration_ms": 4369,
+          "bytes_per_packet": 389
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:44.381Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 5432 — postgres service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 5432 — postgres service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 5.5,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 5432 — postgres service discovery",
+        "severity": "medium",
+        "cvss_score": 5.5,
+        "source_ip": "192.168.134.247",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "6c2b080d-7343-42e5-bbcb-6c12da55f6e5",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:44.881Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 8080,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "http-alt",
+        "result": "open"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:44.881Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 8080,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "unknown",
+          "is_known_port": false,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 417,
+          "duration_ms": 4126,
+          "bytes_per_packet": 1035
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:44.881Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 8080 — http-alt service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 8080 — http-alt service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 5.9,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 8080 — http-alt service discovery",
+        "severity": "medium",
+        "cvss_score": 5.9,
+        "source_ip": "192.168.134.247",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "43df43d5-5c8f-45ee-8e5e-64fdeea7e348",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:45.381Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 8443,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "https-alt",
+        "result": "filtered"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:45.381Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 8443,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "unknown",
+          "is_known_port": false,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 86,
+          "duration_ms": 2200,
+          "bytes_per_packet": 876
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:45.381Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 8443 — https-alt service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 8443 — https-alt service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 4.6,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 8443 — https-alt service discovery",
+        "severity": "medium",
+        "cvss_score": 4.6,
+        "source_ip": "192.168.134.247",
+        "affected_user": "server-01"
+      }
+    },
+    {
+      "event_id": "4a380f70-cc07-4583-804e-b66e943b2a8c",
+      "raw_event": {
+        "timestamp": "2026-06-12T09:46:45.881Z",
+        "log_type": "network",
+        "source_ip": "192.168.134.247",
+        "destination_ip": "10.0.0.5",
+        "port": 3389,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "service": "rdp",
+        "result": "open"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T09:46:45.881Z",
+        "source_ip": "192.168.134.247",
+        "dest_ip": "10.0.0.5",
+        "src_port": 0,
+        "dest_port": 3389,
+        "protocol": "tcp",
+        "action": "port_scan",
+        "bytes_in": 48,
+        "bytes_out": 0,
+        "log_family": "network",
+        "url_path": null,
+        "http_method": null,
+        "http_status_code": null,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": true,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 8,
+          "failed_login_count": 0,
+          "avg_bytes_out": 0,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "east_west",
+          "src_is_internal": true,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "rdp",
+          "is_known_port": true,
+          "is_high_risk_port": true,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 254,
+          "duration_ms": 2626,
+          "bytes_per_packet": 790
+        },
+        "network_protocol_features": {
+          "protocol": "tcp",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": false,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "192.168.134.247",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "192.168.134.247",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "port_scan",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 1,
+          "web": 0,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T09:46:45.881Z",
+          "window_1m": "2026-06-12T09:46",
+          "window_5m": "2026-06-12T09:46",
+          "window_15m": "2026-06-12T09:46",
+          "window_1h": "2026-06-12T09:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "network"
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.65,
+        "anomaly_level": "high",
+        "anomaly_flags": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Detected: rare source ip",
+          "Detected: sequential port scan",
+          "Detected: rapid connection attempts"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "reconnaissance"
+        ],
+        "mapped_pattern": "reconnaissance",
+        "severity": "medium",
+        "confidence": 0.82,
+        "reasoning": [
+          "Pattern matches reconnaissance TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "192.168.134.247"
+          ],
+          "domains": [],
+          "urls": [],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "medium",
+        "match_count": 1,
+        "matched_iocs": [
+          "192.168.134.247"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "rare_source_ip",
+          "sequential_port_scan",
+          "rapid_connection_attempts"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 0.9199999999999999
+      },
+      "detection": {
+        "label": "malicious",
+        "severity": "medium",
+        "confidence": 0.82,
+        "threat_type": "reconnaissance",
+        "reasoning": [
+          "High-confidence reconnaissance pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: rare_source_ip"
+        ],
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ]
+      },
+      "cis": {
+        "benchmark_id": "CIS-13",
+        "framework": "CIS Controls v8",
+        "title": "Network Monitoring & Defense",
+        "description": "Monitor network traffic for unauthorized scanning activity",
+        "remediation": "Deploy IDS rules to block sequential port scans. Block source IP at perimeter firewall."
+      },
+      "ai_analysis": {
+        "summary": "Port scan from 192.168.134.247 on port 3389 — rdp service discovery",
+        "blast_radius": "",
+        "confidence_note": "",
+        "one_liner": "Port scan from 192.168.134.247 on port 3389 — rdp service discovery",
+        "intent": "Port Scanning / Reconnaissance",
+        "narrative": "192.168.134.247 is performing systematic port scanning across 8 ports on 10.0.0.5. Covers SSH, HTTP, HTTPS, database, and RDP ports — consistent with pre-exploitation reconnaissance (MITRE T1046). Scan rate indicates automated tooling.",
+        "attack_vector": "network",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "next_steps": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ]
+      },
+      "cvss": {
+        "base_score": 5.7,
+        "severity": "medium",
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "response": {
+        "priority": "P2",
+        "recommended_actions": [
+          "Block source IP at edge firewall",
+          "Review firewall rules for port exposure",
+          "Enable IDS alerting for scan patterns"
+        ],
+        "containment_steps": [
+          "Block IP at perimeter",
+          "Enable port-scan detection in SIEM"
+        ]
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "Port scan from 192.168.134.247 on port 3389 — rdp service discovery",
+        "severity": "medium",
+        "cvss_score": 5.7,
+        "source_ip": "192.168.134.247",
         "affected_user": "server-01"
       }
     }

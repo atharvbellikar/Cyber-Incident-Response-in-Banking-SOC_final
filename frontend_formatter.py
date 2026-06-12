@@ -127,6 +127,9 @@ def format_pipeline_for_frontend(parsed_logs, layer1_output, layer2_output, laye
             else:
                 formatted["detection"]["threat_type"] = "suspicious_activity"
         
+        # Initialize Advisor Agent fields
+        formatted = add_advisor_agent_to_event(formatted)
+        
         frontend_results.append(formatted)
         
     return {
@@ -134,3 +137,68 @@ def format_pipeline_for_frontend(parsed_logs, layer1_output, layer2_output, laye
         "total_events": len(frontend_results),
         "events": frontend_results
     }
+
+def add_advisor_agent_to_event(event):
+    detection = event.get("detection") or {}
+    threat_analysis = event.get("threat_analysis") or {}
+    cis = event.get("cis") or {}
+    ai = event.get("ai_analysis") or {}
+    resp = event.get("response") or {}
+    
+    # Extract values
+    benchmark_id = cis.get("benchmark_id") or "CIS-16"
+    benchmark_title = cis.get("title") or "Application Monitoring"
+    matched_domain = cis.get("framework") or "CIS Controls"
+    
+    # Recommendation
+    recommendation = ""
+    if resp.get("recommended_actions"):
+        recommendation = " | ".join(resp.get("recommended_actions"))
+    elif cis.get("remediation"):
+        recommendation = cis.get("remediation")
+    else:
+        recommendation = "Establish appropriate security monitoring and isolation controls."
+        
+    # Rationale
+    rationale = ai.get("narrative") or cis.get("description") or "No detailed rationale available."
+    
+    # Confidence
+    confidence = float(detection.get("confidence") or threat_analysis.get("confidence") or 0.7)
+    
+    # CVSS
+    impact = ai.get("impact") or {}
+    cvss_handoff = {
+        "attack_vector": ai.get("attack_vector") or "network",
+        "attack_complexity": ai.get("attack_complexity") or "low",
+        "privileges_required": ai.get("privileges_required") or "none",
+        "user_interaction": ai.get("user_interaction") or "none",
+        "scope": ai.get("scope") or "unchanged",
+        "confidentiality_impact": impact.get("confidentiality") or "low",
+        "integrity_impact": impact.get("integrity") or "low",
+        "availability_impact": impact.get("availability") or "low",
+        "suggested_severity": detection.get("severity") or "medium",
+        "requires_cvss_layer_validation": True
+    }
+    
+    advisor_agent = {
+        "agent_name": "SENTRA CIS-CVSS Advisor",
+        "agent_type": "recommendation_agent",
+        "input_layers": ["layer_2_detection", "layer_3_cis_mapping"],
+        "cis_recommendation": {
+            "benchmark_id": benchmark_id,
+            "benchmark_title": benchmark_title,
+            "matched_domain": matched_domain,
+            "recommendation": recommendation,
+            "rationale": rationale,
+            "confidence": confidence
+        },
+        "cvss_handoff": cvss_handoff,
+        "next_layer_status": {
+            "cvss_ready": True,
+            "response_ready": True
+        }
+    }
+    
+    event["advisor_agent"] = advisor_agent
+    return event
+

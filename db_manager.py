@@ -55,13 +55,10 @@ def init_db():
         print("[db_manager] Migration: added analyst_label column to incidents table.")
     # ─────────────────────────────────────────────────────────────────────────
 
-    # Check if empty, and seed
-    cursor.execute("SELECT COUNT(*) FROM incidents")
-    count = cursor.fetchone()[0]
-    if count == 0:
-        print("[db_manager] Database is empty. Seeding mock incidents...")
-        seed_db(cursor)
-        conn.commit()
+    # Always seed mock/standard incidents to ensure they are available in the database
+    print("[db_manager] Seeding/Syncing standard mock incidents...")
+    seed_db(cursor)
+    conn.commit()
     conn.close()
 
 def seed_db(cursor):
@@ -104,10 +101,10 @@ def seed_db(cursor):
             deduped_events[eid] = event
 
     for event in deduped_events.values():
-        save_incident_with_cursor(cursor, event)
+        save_incident_with_cursor(cursor, event, overwrite=False)
     print(f"[db_manager] Successfully seeded {len(deduped_events)} incidents.")
 
-def save_incident_with_cursor(cursor, event):
+def save_incident_with_cursor(cursor, event, overwrite=True):
     event_id = event.get("event_id")
     if not event_id:
         return
@@ -128,19 +125,26 @@ def save_incident_with_cursor(cursor, event):
     
     payload = json.dumps(event)
     
-    cursor.execute("""
-        INSERT INTO incidents (event_id, timestamp, severity, threat_type, affected_user, affected_host, source_ip, status, payload)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(event_id) DO UPDATE SET
-            timestamp=excluded.timestamp,
-            severity=excluded.severity,
-            threat_type=excluded.threat_type,
-            affected_user=excluded.affected_user,
-            affected_host=excluded.affected_host,
-            source_ip=excluded.source_ip,
-            status=excluded.status,
-            payload=excluded.payload
-    """, (event_id, timestamp, severity, threat_type, affected_user, affected_host, source_ip, status, payload))
+    if overwrite:
+        cursor.execute("""
+            INSERT INTO incidents (event_id, timestamp, severity, threat_type, affected_user, affected_host, source_ip, status, payload)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(event_id) DO UPDATE SET
+                timestamp=excluded.timestamp,
+                severity=excluded.severity,
+                threat_type=excluded.threat_type,
+                affected_user=excluded.affected_user,
+                affected_host=excluded.affected_host,
+                source_ip=excluded.source_ip,
+                status=excluded.status,
+                payload=excluded.payload
+        """, (event_id, timestamp, severity, threat_type, affected_user, affected_host, source_ip, status, payload))
+    else:
+        cursor.execute("""
+            INSERT INTO incidents (event_id, timestamp, severity, threat_type, affected_user, affected_host, source_ip, status, payload)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(event_id) DO NOTHING
+        """, (event_id, timestamp, severity, threat_type, affected_user, affected_host, source_ip, status, payload))
 
 def save_incident(event):
     conn = get_db_connection()

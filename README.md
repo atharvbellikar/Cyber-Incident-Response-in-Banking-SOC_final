@@ -183,7 +183,6 @@ Each event includes:
 Developed as part of a **hackathon project** with real-world SOC simulation goals.
 
 ---
-Deployed link: https://socpipeline-gz4w74iq4-xsullcraser-8273s-projects.vercel.app
 ## 🏁 Conclusion
 
 This project demonstrates how AI and structured pipelines can transform raw logs into **actionable security intelligence**, mimicking real-world SOC operations.

@@ -1,0 +1,1396 @@
+{
+  "status": "success",
+  "total_events": 5,
+  "events": [
+    {
+      "summary": "Suspicious suspicious_request from 91.240.17.105 targeting /login?user=admin'+OR+'1'='1",
+      "event_id": "6a581587-08fc-48e0-8971-578a8c613a85",
+      "raw_event": {
+        "timestamp": "2026-06-12T10:07:09.466Z",
+        "log_type": "web",
+        "source_ip": "91.240.17.105",
+        "destination_ip": "10.0.0.80",
+        "port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "url": "/login?user=admin'+OR+'1'='1",
+        "http_method": "GET",
+        "http_status": 200,
+        "payload_hint": "Auth bypass via tautology"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T10:07:09.463Z",
+        "source_ip": "91.240.17.105",
+        "dest_ip": null,
+        "src_port": 0,
+        "dest_port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "bytes_in": 0,
+        "bytes_out": 512,
+        "log_family": "web",
+        "url_path": "/login?user=admin'+OR+'1'='1",
+        "http_method": "GET",
+        "http_status_code": 200,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": false,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 1,
+          "failed_login_count": 0,
+          "avg_bytes_out": 512,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "north_south",
+          "src_is_internal": false,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "https",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 373,
+          "duration_ms": 2187,
+          "bytes_per_packet": 767
+        },
+        "network_protocol_features": {
+          "protocol": "https",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": true,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "91.240.17.105",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "91.240.17.105",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "suspicious_request",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 0,
+          "web": 1,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T10:07:09.463Z",
+          "window_1m": "2026-06-12T10:07",
+          "window_5m": "2026-06-12T10:07",
+          "window_15m": "2026-06-12T10:07",
+          "window_1h": "2026-06-12T10:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "web"
+      },
+      "detection": {
+        "label": "malicious",
+        "threat_type": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ],
+        "reasoning": [
+          "High-confidence sql_injection pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: sql_injection_pattern"
+        ]
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.97,
+        "anomaly_level": "critical",
+        "anomaly_flags": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Detected: sql injection pattern",
+          "Detected: rare source ip",
+          "Detected: malicious payload detected"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "sql_injection"
+        ],
+        "mapped_pattern": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "reasoning": [
+          "Pattern matches sql_injection TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "91.240.17.105"
+          ],
+          "domains": [],
+          "urls": [
+            "/login?user=admin'+OR+'1'='1"
+          ],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "critical",
+        "match_count": 1,
+        "matched_iocs": [
+          "91.240.17.105"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 1
+      },
+      "cis": {
+        "benchmark_id": "CIS-16",
+        "framework": "CIS Controls v8",
+        "title": "Application Software Security",
+        "description": "Manage security lifecycle and prevent injection vulnerabilities",
+        "remediation": "Implement parameterised queries. Deploy WAF with SQLi rules. Sanitise all user inputs."
+      },
+      "ai_analysis": {
+        "intent": "SQL Injection — Database Compromise Attempt",
+        "summary": "SQL injection from 91.240.17.105: Auth bypass via tautology",
+        "one_liner": "SQL injection from 91.240.17.105: Auth bypass via tautology",
+        "attack_vector": "network",
+        "attack_complexity": "low",
+        "privileges_required": "none",
+        "user_interaction": "none",
+        "scope": "changed",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "narrative": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/login?user=admin'+OR+'1'='1\". Technique: Auth bypass via tautology. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately.",
+        "next_steps": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ]
+      },
+      "cvss": {
+        "vector": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "C",
+          "C": "H",
+          "I": "H",
+          "A": "H"
+        },
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "base_score": 10,
+        "severity": "critical"
+      },
+      "response": {
+        "priority": "P1",
+        "recommended_actions": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ],
+        "containment_steps": [
+          "Block source IP at WAF",
+          "Rotate database credentials",
+          "Enable query logging"
+        ],
+        "analyst_notes": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/login?user=admin'+OR+'1'='1\". Technique: Auth bypass via tautology. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately."
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "SQL injection from 91.240.17.105: Auth bypass via tautology",
+        "severity": "critical",
+        "cvss_score": 10,
+        "source_ip": "91.240.17.105",
+        "affected_user": "web-server-01"
+      }
+    },
+    {
+      "summary": "Suspicious suspicious_request from 91.240.17.105 targeting /search?q=1;+DROP+TABLE+users;--",
+      "event_id": "a869b6f2-cbbd-4f58-91f4-72cbbeff7e73",
+      "raw_event": {
+        "timestamp": "2026-06-12T10:07:10.266Z",
+        "log_type": "web",
+        "source_ip": "91.240.17.105",
+        "destination_ip": "10.0.0.80",
+        "port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "url": "/search?q=1;+DROP+TABLE+users;--",
+        "http_method": "GET",
+        "http_status": 500,
+        "payload_hint": "Destructive DDL injection"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T10:07:10.266Z",
+        "source_ip": "91.240.17.105",
+        "dest_ip": null,
+        "src_port": 0,
+        "dest_port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "bytes_in": 0,
+        "bytes_out": 512,
+        "log_family": "web",
+        "url_path": "/search?q=1;+DROP+TABLE+users;--",
+        "http_method": "GET",
+        "http_status_code": 500,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": false,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 1,
+          "failed_login_count": 0,
+          "avg_bytes_out": 512,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "north_south",
+          "src_is_internal": false,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "https",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 10,
+          "duration_ms": 3569,
+          "bytes_per_packet": 1063
+        },
+        "network_protocol_features": {
+          "protocol": "https",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": true,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "91.240.17.105",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "91.240.17.105",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "suspicious_request",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 0,
+          "web": 1,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T10:07:10.266Z",
+          "window_1m": "2026-06-12T10:07",
+          "window_5m": "2026-06-12T10:07",
+          "window_15m": "2026-06-12T10:07",
+          "window_1h": "2026-06-12T10:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "web"
+      },
+      "detection": {
+        "label": "malicious",
+        "threat_type": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ],
+        "reasoning": [
+          "High-confidence sql_injection pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: sql_injection_pattern"
+        ]
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.97,
+        "anomaly_level": "critical",
+        "anomaly_flags": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Detected: sql injection pattern",
+          "Detected: rare source ip",
+          "Detected: malicious payload detected"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "sql_injection"
+        ],
+        "mapped_pattern": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "reasoning": [
+          "Pattern matches sql_injection TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "91.240.17.105"
+          ],
+          "domains": [],
+          "urls": [
+            "/search?q=1;+DROP+TABLE+users;--"
+          ],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "critical",
+        "match_count": 1,
+        "matched_iocs": [
+          "91.240.17.105"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 1
+      },
+      "cis": {
+        "benchmark_id": "CIS-16",
+        "framework": "CIS Controls v8",
+        "title": "Application Software Security",
+        "description": "Manage security lifecycle and prevent injection vulnerabilities",
+        "remediation": "Implement parameterised queries. Deploy WAF with SQLi rules. Sanitise all user inputs."
+      },
+      "ai_analysis": {
+        "intent": "SQL Injection — Database Compromise Attempt",
+        "summary": "SQL injection from 91.240.17.105: Destructive DDL injection",
+        "one_liner": "SQL injection from 91.240.17.105: Destructive DDL injection",
+        "attack_vector": "network",
+        "attack_complexity": "low",
+        "privileges_required": "none",
+        "user_interaction": "none",
+        "scope": "changed",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "narrative": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/search?q=1;+DROP+TABLE+users;--\". Technique: Destructive DDL injection. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately.",
+        "next_steps": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ]
+      },
+      "cvss": {
+        "vector": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "C",
+          "C": "H",
+          "I": "H",
+          "A": "H"
+        },
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "base_score": 10,
+        "severity": "critical"
+      },
+      "response": {
+        "priority": "P1",
+        "recommended_actions": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ],
+        "containment_steps": [
+          "Block source IP at WAF",
+          "Rotate database credentials",
+          "Enable query logging"
+        ],
+        "analyst_notes": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/search?q=1;+DROP+TABLE+users;--\". Technique: Destructive DDL injection. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately."
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "SQL injection from 91.240.17.105: Destructive DDL injection",
+        "severity": "critical",
+        "cvss_score": 10,
+        "source_ip": "91.240.17.105",
+        "affected_user": "web-server-01"
+      }
+    },
+    {
+      "summary": "Suspicious suspicious_request from 91.240.17.105 targeting /api/user?id=1+UNION+SELECT+username,password+FROM+accounts--",
+      "event_id": "9e7fed5b-b254-42c2-953d-cd9430958184",
+      "raw_event": {
+        "timestamp": "2026-06-12T10:07:11.067Z",
+        "log_type": "web",
+        "source_ip": "91.240.17.105",
+        "destination_ip": "10.0.0.80",
+        "port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "url": "/api/user?id=1+UNION+SELECT+username,password+FROM+accounts--",
+        "http_method": "GET",
+        "http_status": 200,
+        "payload_hint": "UNION-based data extraction"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T10:07:11.066Z",
+        "source_ip": "91.240.17.105",
+        "dest_ip": null,
+        "src_port": 0,
+        "dest_port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "bytes_in": 0,
+        "bytes_out": 512,
+        "log_family": "web",
+        "url_path": "/api/user?id=1+UNION+SELECT+username,password+FROM+accounts--",
+        "http_method": "GET",
+        "http_status_code": 200,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": false,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 1,
+          "failed_login_count": 0,
+          "avg_bytes_out": 512,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "north_south",
+          "src_is_internal": false,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "https",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 49,
+          "duration_ms": 1640,
+          "bytes_per_packet": 963
+        },
+        "network_protocol_features": {
+          "protocol": "https",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": true,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "91.240.17.105",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "91.240.17.105",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "suspicious_request",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 0,
+          "web": 1,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T10:07:11.066Z",
+          "window_1m": "2026-06-12T10:07",
+          "window_5m": "2026-06-12T10:07",
+          "window_15m": "2026-06-12T10:07",
+          "window_1h": "2026-06-12T10:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "web"
+      },
+      "detection": {
+        "label": "malicious",
+        "threat_type": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ],
+        "reasoning": [
+          "High-confidence sql_injection pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: sql_injection_pattern"
+        ]
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.97,
+        "anomaly_level": "critical",
+        "anomaly_flags": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Detected: sql injection pattern",
+          "Detected: rare source ip",
+          "Detected: malicious payload detected"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "sql_injection"
+        ],
+        "mapped_pattern": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "reasoning": [
+          "Pattern matches sql_injection TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "91.240.17.105"
+          ],
+          "domains": [],
+          "urls": [
+            "/api/user?id=1+UNION+SELECT+username,password+FROM+accounts--"
+          ],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "critical",
+        "match_count": 1,
+        "matched_iocs": [
+          "91.240.17.105"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 1
+      },
+      "cis": {
+        "benchmark_id": "CIS-16",
+        "framework": "CIS Controls v8",
+        "title": "Application Software Security",
+        "description": "Manage security lifecycle and prevent injection vulnerabilities",
+        "remediation": "Implement parameterised queries. Deploy WAF with SQLi rules. Sanitise all user inputs."
+      },
+      "ai_analysis": {
+        "intent": "SQL Injection — Database Compromise Attempt",
+        "summary": "SQL injection from 91.240.17.105: UNION-based data extraction",
+        "one_liner": "SQL injection from 91.240.17.105: UNION-based data extraction",
+        "attack_vector": "network",
+        "attack_complexity": "low",
+        "privileges_required": "none",
+        "user_interaction": "none",
+        "scope": "changed",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "narrative": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/api/user?id=1+UNION+SELECT+username,password+FROM+accounts--\". Technique: UNION-based data extraction. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately.",
+        "next_steps": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ]
+      },
+      "cvss": {
+        "vector": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "C",
+          "C": "H",
+          "I": "H",
+          "A": "H"
+        },
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "base_score": 10,
+        "severity": "critical"
+      },
+      "response": {
+        "priority": "P1",
+        "recommended_actions": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ],
+        "containment_steps": [
+          "Block source IP at WAF",
+          "Rotate database credentials",
+          "Enable query logging"
+        ],
+        "analyst_notes": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/api/user?id=1+UNION+SELECT+username,password+FROM+accounts--\". Technique: UNION-based data extraction. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately."
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "SQL injection from 91.240.17.105: UNION-based data extraction",
+        "severity": "critical",
+        "cvss_score": 10,
+        "source_ip": "91.240.17.105",
+        "affected_user": "web-server-01"
+      }
+    },
+    {
+      "summary": "Suspicious suspicious_request from 91.240.17.105 targeting /products?id=1'+AND+SLEEP(5)--",
+      "event_id": "0ab7fcce-283a-4342-af69-c93c5faffdca",
+      "raw_event": {
+        "timestamp": "2026-06-12T10:07:11.867Z",
+        "log_type": "web",
+        "source_ip": "91.240.17.105",
+        "destination_ip": "10.0.0.80",
+        "port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "url": "/products?id=1'+AND+SLEEP(5)--",
+        "http_method": "GET",
+        "http_status": 200,
+        "payload_hint": "Time-based blind SQLi (5s delay)"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T10:07:11.867Z",
+        "source_ip": "91.240.17.105",
+        "dest_ip": null,
+        "src_port": 0,
+        "dest_port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "bytes_in": 0,
+        "bytes_out": 512,
+        "log_family": "web",
+        "url_path": "/products?id=1'+AND+SLEEP(5)--",
+        "http_method": "GET",
+        "http_status_code": 200,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": false,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 1,
+          "failed_login_count": 0,
+          "avg_bytes_out": 512,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "north_south",
+          "src_is_internal": false,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "https",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 20,
+          "duration_ms": 2180,
+          "bytes_per_packet": 491
+        },
+        "network_protocol_features": {
+          "protocol": "https",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": true,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "91.240.17.105",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "91.240.17.105",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "suspicious_request",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 0,
+          "web": 1,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T10:07:11.867Z",
+          "window_1m": "2026-06-12T10:07",
+          "window_5m": "2026-06-12T10:07",
+          "window_15m": "2026-06-12T10:07",
+          "window_1h": "2026-06-12T10:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "web"
+      },
+      "detection": {
+        "label": "malicious",
+        "threat_type": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ],
+        "reasoning": [
+          "High-confidence sql_injection pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: sql_injection_pattern"
+        ]
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.97,
+        "anomaly_level": "critical",
+        "anomaly_flags": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Detected: sql injection pattern",
+          "Detected: rare source ip",
+          "Detected: malicious payload detected"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "sql_injection"
+        ],
+        "mapped_pattern": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "reasoning": [
+          "Pattern matches sql_injection TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "91.240.17.105"
+          ],
+          "domains": [],
+          "urls": [
+            "/products?id=1'+AND+SLEEP(5)--"
+          ],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "critical",
+        "match_count": 1,
+        "matched_iocs": [
+          "91.240.17.105"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 1
+      },
+      "cis": {
+        "benchmark_id": "CIS-16",
+        "framework": "CIS Controls v8",
+        "title": "Application Software Security",
+        "description": "Manage security lifecycle and prevent injection vulnerabilities",
+        "remediation": "Implement parameterised queries. Deploy WAF with SQLi rules. Sanitise all user inputs."
+      },
+      "ai_analysis": {
+        "intent": "SQL Injection — Database Compromise Attempt",
+        "summary": "SQL injection from 91.240.17.105: Time-based blind SQLi (5s delay)",
+        "one_liner": "SQL injection from 91.240.17.105: Time-based blind SQLi (5s delay)",
+        "attack_vector": "network",
+        "attack_complexity": "low",
+        "privileges_required": "none",
+        "user_interaction": "none",
+        "scope": "changed",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "narrative": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/products?id=1'+AND+SLEEP(5)--\". Technique: Time-based blind SQLi (5s delay). Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately.",
+        "next_steps": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ]
+      },
+      "cvss": {
+        "vector": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "C",
+          "C": "H",
+          "I": "H",
+          "A": "H"
+        },
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "base_score": 10,
+        "severity": "critical"
+      },
+      "response": {
+        "priority": "P1",
+        "recommended_actions": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ],
+        "containment_steps": [
+          "Block source IP at WAF",
+          "Rotate database credentials",
+          "Enable query logging"
+        ],
+        "analyst_notes": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/products?id=1'+AND+SLEEP(5)--\". Technique: Time-based blind SQLi (5s delay). Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately."
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "SQL injection from 91.240.17.105: Time-based blind SQLi (5s delay)",
+        "severity": "critical",
+        "cvss_score": 10,
+        "source_ip": "91.240.17.105",
+        "affected_user": "web-server-01"
+      }
+    },
+    {
+      "summary": "Suspicious suspicious_request from 91.240.17.105 targeting /login?user=admin'--",
+      "event_id": "e5f89f0a-1aec-47a9-bdf9-72ba1f5a4fb1",
+      "raw_event": {
+        "timestamp": "2026-06-12T10:07:12.667Z",
+        "log_type": "web",
+        "source_ip": "91.240.17.105",
+        "destination_ip": "10.0.0.80",
+        "port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "url": "/login?user=admin'--",
+        "http_method": "GET",
+        "http_status": 302,
+        "payload_hint": "Comment-based auth bypass"
+      },
+      "ingestion": {
+        "timestamp": "2026-06-12T10:07:12.667Z",
+        "source_ip": "91.240.17.105",
+        "dest_ip": null,
+        "src_port": 0,
+        "dest_port": 443,
+        "protocol": "https",
+        "action": "suspicious_request",
+        "bytes_in": 0,
+        "bytes_out": 512,
+        "log_family": "web",
+        "url_path": "/login?user=admin'--",
+        "http_method": "GET",
+        "http_status_code": 302,
+        "user_agent": null
+      },
+      "feature_engineering": {
+        "temporal_features": {
+          "event_count_1m": 1,
+          "event_count_5m": 1,
+          "event_count_15m": 1,
+          "event_count_1h": 1,
+          "is_frequency_accelerating": true,
+          "is_first_seen_source": true,
+          "sequence_position_in_1m": 1,
+          "is_off_hours": false
+        },
+        "behavioral_features": {
+          "deviation_score": 0.85,
+          "is_off_hours_for_user": false,
+          "is_new_ip_for_user": true,
+          "is_new_user": true,
+          "excessive_failed_logins": false,
+          "baseline_established": false,
+          "normal_hours_count": 1,
+          "normal_ips_count": 1,
+          "failed_login_count": 0,
+          "rare_source_ip": true,
+          "rare_user_activity": true,
+          "login_failure_spike": false
+        },
+        "statistical_features": {
+          "z_score": 2.4,
+          "event_count_window": 1
+        },
+        "frequency_features": {
+          "current_window_count": 1,
+          "zscore": 2.4,
+          "percentile_rank": 0.97,
+          "spike_detected": true,
+          "history_window_count": 0
+        },
+        "pattern_features": {
+          "port_scan_detected": false,
+          "brute_force_detected": false,
+          "exfiltration_detected": false,
+          "lateral_movement_detected": false,
+          "unique_ports_seen": 1,
+          "failed_login_count": 0,
+          "avg_bytes_out": 512,
+          "unique_hosts_seen": 1
+        },
+        "network_traffic_features": {
+          "traffic_direction": "north_south",
+          "src_is_internal": false,
+          "dst_is_internal": true,
+          "bytes_ratio": 0,
+          "dest_port_service": "https",
+          "is_known_port": true,
+          "is_high_risk_port": false,
+          "has_tcp_flags": false,
+          "tcp_flag_value": null,
+          "is_syn_only": false,
+          "packet_count": 32,
+          "duration_ms": 1264,
+          "bytes_per_packet": 735
+        },
+        "network_protocol_features": {
+          "protocol": "https",
+          "is_protocol_expected": true,
+          "is_deprecated_protocol": false,
+          "is_tunneling_capable": true,
+          "is_new_protocol_for_source": true,
+          "unique_protocols_for_source": 1,
+          "protocol_anomaly_detected": false
+        },
+        "user_profile": {
+          "user_key": "91.240.17.105",
+          "is_new_user": true,
+          "current_hour": 15,
+          "current_source_ip": "91.240.17.105",
+          "is_new_ip_for_user": true,
+          "total_events_seen": 1,
+          "failed_login_count": 0,
+          "unique_ips_seen": 1,
+          "current_action": "suspicious_request",
+          "current_event_type": "unknown"
+        },
+        "identity_features": {
+          "risky_signin": false
+        },
+        "classification_scores": {
+          "network": 0,
+          "web": 1,
+          "iot": 0
+        },
+        "time_windows": {
+          "timestamp_parsed": "2026-06-12T10:07:12.667Z",
+          "window_1m": "2026-06-12T10:07",
+          "window_5m": "2026-06-12T10:07",
+          "window_15m": "2026-06-12T10:07",
+          "window_1h": "2026-06-12T10:00",
+          "hour_of_day": 15,
+          "day_of_week": "Friday",
+          "is_weekend": false,
+          "is_off_hours": false,
+          "time_of_day": "afternoon"
+        },
+        "log_family": "web"
+      },
+      "detection": {
+        "label": "malicious",
+        "threat_type": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "triggered_engines": [
+          "signature",
+          "anomaly",
+          "ml"
+        ],
+        "reasoning": [
+          "High-confidence sql_injection pattern detected",
+          "Source IP has no legitimate baseline",
+          "Anomaly flag: sql_injection_pattern"
+        ]
+      },
+      "anomaly_detection": {
+        "anomaly_score": 0.97,
+        "anomaly_level": "critical",
+        "anomaly_flags": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Detected: sql injection pattern",
+          "Detected: rare source ip",
+          "Detected: malicious payload detected"
+        ]
+      },
+      "threat_analysis": {
+        "matched_patterns": [
+          "sql_injection"
+        ],
+        "mapped_pattern": "sql_injection",
+        "severity": "critical",
+        "confidence": 0.97,
+        "reasoning": [
+          "Pattern matches sql_injection TTP"
+        ]
+      },
+      "ioc_enrichment": {
+        "observables": {
+          "ips": [
+            "91.240.17.105"
+          ],
+          "domains": [],
+          "urls": [
+            "/login?user=admin'--"
+          ],
+          "hashes": []
+        },
+        "matched": true,
+        "risk_level": "critical",
+        "match_count": 1,
+        "matched_iocs": [
+          "91.240.17.105"
+        ]
+      },
+      "correlation_analysis": {
+        "correlated": true,
+        "correlation_strength": "strong",
+        "signal_count": 3,
+        "supporting_signals": [
+          "sql_injection_pattern",
+          "rare_source_ip",
+          "malicious_payload_detected"
+        ],
+        "reasoning": [
+          "Multiple correlated signals detected in same time window"
+        ],
+        "adjusted_confidence": 1
+      },
+      "cis": {
+        "benchmark_id": "CIS-16",
+        "framework": "CIS Controls v8",
+        "title": "Application Software Security",
+        "description": "Manage security lifecycle and prevent injection vulnerabilities",
+        "remediation": "Implement parameterised queries. Deploy WAF with SQLi rules. Sanitise all user inputs."
+      },
+      "ai_analysis": {
+        "intent": "SQL Injection — Database Compromise Attempt",
+        "summary": "SQL injection from 91.240.17.105: Comment-based auth bypass",
+        "one_liner": "SQL injection from 91.240.17.105: Comment-based auth bypass",
+        "attack_vector": "network",
+        "attack_complexity": "low",
+        "privileges_required": "none",
+        "user_interaction": "none",
+        "scope": "changed",
+        "impact": {
+          "confidentiality": "high",
+          "integrity": "high",
+          "availability": "high"
+        },
+        "narrative": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/login?user=admin'--\". Technique: Comment-based auth bypass. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately.",
+        "next_steps": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ]
+      },
+      "cvss": {
+        "vector": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "C",
+          "C": "H",
+          "I": "H",
+          "A": "H"
+        },
+        "vector_string": "AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "base_score": 10,
+        "severity": "critical"
+      },
+      "response": {
+        "priority": "P1",
+        "recommended_actions": [
+          "Block attacker IP at WAF",
+          "Audit all database queries from this session",
+          "Enable WAF in blocking mode"
+        ],
+        "containment_steps": [
+          "Block source IP at WAF",
+          "Rotate database credentials",
+          "Enable query logging"
+        ],
+        "analyst_notes": "Attacker 91.240.17.105 is executing SQL injection attacks. Payload: \"/login?user=admin'--\". Technique: Comment-based auth bypass. Targets authentication and data retrieval layers — potential for auth bypass, data leakage, or full database compromise (MITRE T1190, T1059.007). Deploy WAF block rule immediately."
+      },
+      "final_report": {
+        "owner": "SOC Tier-2",
+        "status": "open"
+      },
+      "dashboard": {
+        "alert_title": "SQL injection from 91.240.17.105: Comment-based auth bypass",
+        "severity": "critical",
+        "cvss_score": 10,
+        "source_ip": "91.240.17.105",
+        "affected_user": "web-server-01"
+      }
+    }
+  ]
+}

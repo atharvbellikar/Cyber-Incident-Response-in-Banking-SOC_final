@@ -1,0 +1,54 @@
+[
+  {
+    "timestamp": "2026-04-07T10:00:01Z",
+    "log_type": "network",
+    "source_ip": "192.168.1.100",
+    "destination_ip": "10.0.0.5",
+    "port": 22,
+    "protocol": "tcp",
+    "action": "port_scan",
+    "affected_host": "server-01"
+  },
+  {
+    "timestamp": "2026-04-07T10:01:10Z",
+    "log_type": "network",
+    "source_ip": "203.0.113.55",
+    "destination_ip": "10.0.0.8",
+    "port": 443,
+    "protocol": "https",
+    "action": "beaconing",
+    "affected_host": "endpoint-23"
+  },
+  {
+    "timestamp": "2026-04-07T10:02:20Z",
+    "log_type": "web",
+    "source_ip": "91.240.118.33",
+    "url": "/login?user=admin' OR '1'='1",
+    "action": "suspicious_request",
+    "affected_host": "web-server-01"
+  },
+  {
+    "timestamp": "2026-04-07T10:03:30Z",
+    "log_type": "web",
+    "source_ip": "185.199.110.153",
+    "url": "/admin/upload.php",
+    "action": "web_attack",
+    "affected_host": "web-server-02"
+  },
+  {
+    "timestamp": "2026-04-07T10:04:45Z",
+    "log_type": "iot",
+    "source_ip": "192.0.2.45",
+    "affected_host": "iot-camera-01",
+    "action": "credential_abuse",
+    "protocol": "telnet"
+  },
+  {
+    "timestamp": "2026-04-07T10:05:55Z",
+    "log_type": "network",
+    "source_ip": "10.10.1.50",
+    "destination_ip": "10.10.1.75",
+    "action": "lateral_movement",
+    "affected_host": "internal-db-01"
+  }
+]

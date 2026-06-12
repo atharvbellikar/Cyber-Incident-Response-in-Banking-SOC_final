@@ -1,0 +1,46 @@
+{
+  "intents": {
+    "Ransomware": {
+      "impact": {
+        "availability": "high",
+        "integrity": "high"
+      }
+    },
+    "Data Exfiltration": {
+      "impact": {
+        "confidentiality": "high"
+      }
+    },
+    "Phishing": {
+      "exploitability": {
+        "user_interaction": "required",
+        "attack_vector": "network"
+      }
+    },
+    "Brute Force Attack": {
+      "exploitability": {
+        "privileges_required": "none"
+      }
+    },
+    "DDoS": {
+      "impact": {
+        "availability": "high",
+        "confidentiality": "none",
+        "integrity": "none"
+      },
+      "exploitability": {
+        "attack_vector": "network",
+        "privileges_required": "none"
+      }
+    }
+  },
+  "asset_criticality": {
+    "critical": {
+      "impact": {
+        "confidentiality": "high",
+        "integrity": "high",
+        "availability": "high"
+      }
+    }
+  }
+}

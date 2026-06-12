@@ -1,0 +1,57 @@
+{
+  "engine_1_exploitability": {
+    "attack_vector": {
+      "network": "N",
+      "adjacent": "A",
+      "local": "L",
+      "physical": "P"
+    },
+    "attack_complexity": {
+      "low": "L",
+      "high": "H"
+    },
+    "privileges_required": {
+      "none": "N",
+      "low": "L",
+      "high": "H"
+    },
+    "user_interaction": {
+      "none": "N",
+      "required": "R"
+    }
+  },
+  "engine_2_impact": {
+    "confidentiality": {
+      "high": "H",
+      "low": "L",
+      "medium": "L",
+      "none": "N"
+    },
+    "integrity": {
+      "high": "H",
+      "low": "L",
+      "medium": "L",
+      "none": "N"
+    },
+    "availability": {
+      "high": "H",
+      "low": "L",
+      "medium": "L",
+      "none": "N"
+    },
+    "scope": {
+      "unchanged": "U",
+      "changed": "C"
+    }
+  },
+  "engine_4_fallbacks": {
+    "attack_vector": "network",
+    "attack_complexity": "low",
+    "privileges_required": "none",
+    "user_interaction": "none",
+    "scope": "unchanged",
+    "confidentiality": "high",
+    "integrity": "high",
+    "availability": "high"
+  }
+}

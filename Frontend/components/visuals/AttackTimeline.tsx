@@ -16,11 +16,12 @@ interface AttackTimelineProps {
   pipeline?: EventPipeline;
 }
 
+// UTC-based formatting (deterministic across SSR/client → no hydration mismatch).
 function formatTime(isoOrText: string | undefined, fallback: string): string {
   if (!isoOrText) return fallback;
   const date = new Date(isoOrText);
   if (Number.isNaN(date.getTime())) return fallback;
-  return date.toLocaleTimeString([], { hour12: false });
+  return date.toISOString().slice(11, 19);
 }
 
 function plusSeconds(iso: string | undefined, seconds: number, fallback: string): string {
@@ -28,7 +29,7 @@ function plusSeconds(iso: string | undefined, seconds: number, fallback: string)
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return fallback;
   date.setSeconds(date.getSeconds() + seconds);
-  return date.toLocaleTimeString([], { hour12: false });
+  return date.toISOString().slice(11, 19);
 }
 
 function normalizeSeverity(value: string | undefined): "low" | "medium" | "high" | "critical" {
@@ -42,13 +43,23 @@ function normalizeSeverity(value: string | undefined): "low" | "medium" | "high"
 function buildTimelineFromPipeline(pipeline?: EventPipeline): TimelineEvent[] {
   if (!pipeline) return [];
 
-  const baseTime = typeof pipeline.raw_event?.timestamp === "string" ? pipeline.raw_event.timestamp : undefined;
+  // Real backend events carry the ISO time on ingestion.timestamp (raw_event.timestamp
+  // is null for several log shapes); fall back to it so the timeline isn't blank.
+  const baseTime =
+    (typeof pipeline.ingestion?.timestamp === "string" ? pipeline.ingestion.timestamp : undefined) ??
+    (typeof pipeline.raw_event?.timestamp === "string" ? pipeline.raw_event.timestamp : undefined);
   const detectionSeverity = normalizeSeverity(pipeline.detection?.severity || pipeline.dashboard?.severity);
   const anomalyScore = Number(pipeline.anomaly_detection?.anomaly_score ?? 0);
   const anomalySeverity: "medium" | "high" = anomalyScore >= 0.8 ? "high" : "medium";
 
-  const ingestionSource = pipeline.ingestion?.source ?? "Unknown Source";
-  const rawEventName = pipeline.raw_event?.event_name ?? "Security Event";
+  // Backend doesn't emit ingestion.source; it carries the log family instead.
+  // Keep ingestion.source for legacy/mock data, then fall back to log_family.
+  const ingestionSource = pipeline.ingestion?.source ?? pipeline.ingestion?.log_family ?? "Unknown Source";
+  const rawEventName =
+    pipeline.raw_event?.event_name ??
+    pipeline.detection?.threat_type ??
+    pipeline.dashboard?.alert_title ??
+    "Security Event";
   const detectionLabel = pipeline.detection?.label ?? "Detection Triggered";
   const threatType = pipeline.detection?.threat_type ?? "Potential Threat";
   const reasoning = Array.isArray(pipeline.detection?.reasoning) ? pipeline.detection.reasoning : [];

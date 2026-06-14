@@ -5,22 +5,25 @@ from layer_3_cis.benchmark_matcher import retrieve_benchmarks
 def process_web_event(entry: dict) -> dict:
     enriched = deepcopy(entry)
     raw_event = entry.get("raw_event", {}) or {}
-    threat = entry.get("engine_2_threat_intel", {}) or {}
+    # Read the keys Layer 2 actually emits (threat_analysis); legacy name as fallback.
+    threat = entry.get("threat_analysis", {}) or entry.get("engine_2_threat_intel", {}) or {}
     detection = entry.get("detection", {}) or {}
 
     # Pull from MORE fields, not just mitre_technique_name
     mitre_name = str(threat.get("mitre_technique_name", "") or "").lower()
     mitre_tactic = str(threat.get("mitre_tactic", "") or "").lower()
+    mapped_pattern = str(threat.get("mapped_pattern", "") or "").lower()
     threat_type = str(detection.get("threat_type", "") or "").lower()
     label = str(detection.get("label", "") or "").lower()
     host = str(raw_event.get("affected_host", "") or "").lower()
+    url = str(raw_event.get("url", "") or "").lower()
 
     query_tags = ["web_application", "application_security"]  # Always start with base tags
     query_keywords = ["web", "application"]
     section_hint = []
 
-    # Use ALL available fields as signal
-    combined_signal = f"{mitre_name} {mitre_tactic} {threat_type} {label}"
+    # Use ALL available fields as signal (including the URL and the real mapped pattern).
+    combined_signal = f"{mitre_name} {mitre_tactic} {mapped_pattern} {threat_type} {label} {url}"
 
     if any(w in combined_signal for w in ["inject", "sqli", "xss", "traversal"]):
         query_tags.extend(["injection", "input_validation"])
@@ -36,7 +39,9 @@ def process_web_event(entry: dict) -> dict:
         query_tags.extend(["availability", "rate_limiting", "dos_protection"])
         section_hint.append("availability")
 
-    # ... rest of function unchanged
+    # Correlation signals are optional; pull from whichever key upstream emitted
+    # (defaults to empty so a missing block never raises a NameError).
+    correlation = entry.get("engine_3_correlation", {}) or entry.get("correlation_analysis", {}) or {}
 
     timeline = correlation.get("attack_timeline", []) or []
     if timeline:

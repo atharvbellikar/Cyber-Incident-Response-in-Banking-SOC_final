@@ -8,14 +8,16 @@ type Props = {
 };
 
 export default function EntityPivot({ type, value }: Props) {
+  // Non-interactive entity chip. There is no pivot/search-by-URL feature wired
+  // up, so rendering a clickable <button> advertised a click target that did
+  // nothing. Render a plain <span> without interactive affordances.
   return (
-    <button
-      type="button"
+    <span
       data-entity-type={type}
-      title={`Pivot by ${type}: ${value}`}
-      className="font-mono text-xs text-blue-300 bg-blue-900/20 px-2 py-1 rounded-sm cursor-pointer transition-colors hover:bg-blue-800/40 hover:text-blue-100"
+      title={value}
+      className="font-mono text-xs text-blue-300 bg-blue-900/20 px-2 py-1 rounded-sm"
     >
       {value}
-    </button>
+    </span>
   );
 }

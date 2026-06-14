@@ -3,12 +3,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 export type IncidentAction = "true_positive" | "false_positive" | "escalate" | "contain";
 
+// Matches the real backend POST /api/incidents/{id}/action success response:
+//   {"status":"success","incidentId":"<id>","action":"<action>","currentStatus":"investigating"}
+// (verified live; the proxy forwards backend JSON verbatim). `message` is not
+// part of the success payload, so it's optional — kept for consumers that read
+// an optional human-readable note (e.g. ResponseCard's `result.message ?? …`).
 export type IncidentActionResponse = {
+  status: "success";
   incidentId: string;
   action: IncidentAction;
-  status: "accepted" | "failed";
-  message: string;
-  updatedAt: string;
+  currentStatus: "open" | "investigating" | "closed";
+  message?: string;
 };
 
 export async function updateIncidentStatus(id: string, action: IncidentAction): Promise<IncidentActionResponse> {

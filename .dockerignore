@@ -1,0 +1,15 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.next/
+node_modules/
+Frontend/node_modules/
+Frontend/.next/
+*.db
+*.db-wal
+*.db-shm
+*.log
+.env
+logs/

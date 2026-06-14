@@ -35,7 +35,9 @@ def main():
     print("Input logs count:", len(normalized_records))
 
     from layer_1_feature_engineering.feature_orchestrator import run_feature_engineering
+    from layer_1_feature_engineering.state_reset import reset_feature_state
 
+    reset_feature_state()
     for rec in normalized_records:
         layer1_result.append(run_feature_engineering(rec))
 
@@ -63,12 +65,15 @@ def main():
     from layer_4_ai_analysis.incident_report_builder import run_layer4
     from layer_5_cvss.cvss_orchestrator import run_cvss
     from layer_6_response.response_orchestrator import run_response
+    from frontend_formatter import build_dashboard_block, build_final_report
 
     enriched_events = run_layer4(frontend_output["events"])
 
     for event in enriched_events:
         event["cvss"] = run_cvss(event["ai_analysis"])
         event["response"] = run_response(event)
+        event["dashboard"] = build_dashboard_block(event)
+        event["final_report"] = build_final_report(event)
 
     frontend_output["events"] = enriched_events
 

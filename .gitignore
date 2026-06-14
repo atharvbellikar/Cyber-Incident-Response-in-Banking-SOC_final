@@ -1,9 +1,10 @@
-﻿.venv/
+.venv/
 venv/
 __pycache__/
 *.pyc
 .env
 .env.*
+!.env.example
 node_modules/
 .next/
 dist/
@@ -11,3 +12,15 @@ build/
 .cache/
 *.log
 .DS_Store
+
+# Runtime / generated artifacts (must NOT be committed — incident data leakage)
+*.db
+*.db-wal
+*.db-shm
+soc_incidents.db
+frontend_output.json
+Frontend/public/frontend_output.json
+layer1_output.json
+layer2_output.json
+layer3_output.json
+layer_3_cis/layer3_output.json

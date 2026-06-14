@@ -1,6 +1,7 @@
 "use client";
 
 import { EventPipeline } from "@/lib/mockData";
+import { formatTimestamp } from "@/lib/format";
 
 interface AIAnalysisPanelProps {
   pipeline: EventPipeline | null;
@@ -25,12 +26,20 @@ export default function AIAnalysisPanel({ pipeline }: AIAnalysisPanelProps) {
   const cvss = (pipeline?.cvss ?? {}) as Record<string, any>;
   const ai   = (pipeline?.ai_analysis ?? {}) as Record<string, any>;
   const raw  = (pipeline?.raw_event   ?? {}) as Record<string, any>;
+  const ing  = (pipeline?.ingestion   ?? {}) as Record<string, any>;
+
+  // Backend fills "unknown"/"anonymous" placeholders for fields it couldn't
+  // resolve; treat those (and blanks) as missing so we show an em-dash instead.
+  const clean = (v: any) =>
+    v != null && !["", "unknown", "anonymous"].includes(String(v).trim().toLowerCase()) ? v : null;
 
   const eventId   = pipeline?.event_id ?? null;
-  const timestamp = raw.timestamp ?? null;
-  const sourceIp  = pipeline?.dashboard?.source_ip ?? raw.source_ip ?? null;
-  const user      = pipeline?.dashboard?.affected_user ?? raw.affected_user ?? raw.user ?? null;
-  const host      = raw.affected_host ?? raw.host ?? null;
+  // Real backend time lives on ingestion.timestamp; raw_event.timestamp is null
+  // for several log shapes. formatTimestamp renders an em-dash when null.
+  const timestamp = ing.timestamp ?? raw.timestamp ?? null;
+  const sourceIp  = clean(ing.source_ip) ?? clean(raw.source_ip) ?? clean(pipeline?.dashboard?.source_ip) ?? null;
+  const user      = clean(pipeline?.dashboard?.affected_user) ?? clean(raw.affected_user) ?? clean(raw.user) ?? null;
+  const host      = clean(raw.affected_host) ?? clean(raw.host) ?? null;
 
   return (
     <div className="rounded-none border border-slate-700 bg-slate-900 text-xs font-mono text-slate-200">
@@ -51,7 +60,7 @@ export default function AIAnalysisPanel({ pipeline }: AIAnalysisPanelProps) {
           <span className="text-slate-500">Event ID</span>
           <span className="text-slate-300">{eventId ?? "—"}</span>
           <span className="text-slate-500">Timestamp</span>
-          <span className="text-slate-300">{timestamp ? new Date(timestamp).toLocaleString() : "—"}</span>
+          <span className="text-slate-300">{formatTimestamp(timestamp)}</span>
           <span className="text-slate-500">Source IP</span>
           <span className="text-slate-300">{sourceIp ?? "—"}</span>
           <span className="text-slate-500">Affected User</span>

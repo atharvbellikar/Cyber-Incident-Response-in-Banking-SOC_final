@@ -1,0 +1,42 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      SOC_DB_PATH: /data/soc_incidents.db
+      SOC_CORS_ORIGINS: http://localhost:3000
+      SOC_API_KEY: ${SOC_API_KEY:-}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral}
+      SOC_ENV: production
+    volumes:
+      - soc-data:/data
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  frontend:
+    build: ./Frontend
+    ports:
+      - "3000:3000"
+    environment:
+      BACKEND_URL: http://backend:8000
+      BACKEND_API_KEY: ${SOC_API_KEY:-}
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Optional LLM for Layer 4. The pipeline degrades gracefully to rule-based
+  # analysis if this is removed. After first start: `docker compose exec ollama ollama pull mistral`.
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  soc-data:
+  ollama-data:

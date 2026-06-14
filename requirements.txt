@@ -1,13 +1,18 @@
-fastapi>=0.100.0
-uvicorn>=0.22.0
-python-multipart>=0.0.6
-pydantic>=2.0.0
-pydantic-settings>=2.0.0
-requests>=2.31.0
-langchain-ollama>=0.1.0
-langgraph>=0.1.0
-pytest>=7.0.0
-pytest-asyncio>=0.21.0
-elasticsearch>=8.0.0
-redis>=5.0.0
-asyncpg>=0.28.0
+# SOC backend runtime dependencies (pinned for reproducible builds).
+# NOTE: elasticsearch / redis / asyncpg were removed — they were never imported
+# by the served pipeline (only by unwired test-only code in layer_6_response).
+fastapi==0.136.3
+uvicorn==0.49.0
+python-multipart==0.0.32
+pydantic==2.13.4
+python-dotenv==1.2.2
+requests==2.34.2
+
+# Layer 4 (AI analysis) — LLM agent via Ollama. Optional at runtime: the layer
+# falls back to deterministic rule-based analysis when Ollama is unreachable.
+langchain-ollama==1.1.0
+langgraph==1.2.5
+
+# Dev / test only
+pytest==9.1.0
+pytest-asyncio==1.4.0

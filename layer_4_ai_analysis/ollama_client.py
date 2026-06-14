@@ -1,10 +1,24 @@
 # ollama_client.py — full replacement
 
+import os
+import sys
 import requests
 from langchain_ollama import OllamaLLM
 
-OLLAMA_BASE_URL    = "http://localhost:11434"
-OLLAMA_MODEL       = "mistral"
+# Env-configurable so deployments can target a remote Ollama / different model
+# without code changes. Falls back to the project settings module, then to
+# direct env vars, then to local defaults.
+try:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    import settings as _settings
+    OLLAMA_BASE_URL = _settings.OLLAMA_BASE_URL
+    OLLAMA_MODEL    = _settings.OLLAMA_MODEL
+    OLLAMA_TIMEOUT  = _settings.OLLAMA_TIMEOUT
+except Exception:
+    OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    OLLAMA_MODEL    = os.getenv("OLLAMA_MODEL", "mistral")
+    OLLAMA_TIMEOUT  = int(os.getenv("OLLAMA_TIMEOUT", "30"))
+
 OLLAMA_TEMPERATURE = 0
 
 # ── Cached singletons ──

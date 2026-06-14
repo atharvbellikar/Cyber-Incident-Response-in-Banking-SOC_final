@@ -1,21 +1,15 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import SummaryCard from "@/components/cards/SummaryCard";
 import IngestionCard from "@/components/cards/IngestionCard";
 
 import CVSSCard from "@/components/cards/CVSSCard";
-import ResponseCard from "@/components/cards/ResponseCard";
-import AlertSummaryPanel from "@/components/cards/AlertSummaryPanel";
-import IncidentNavTabs from "@/components/shared/IncidentNavTabs";
 import CardBlock from "@/components/cards/CardBlock";
 import SeverityGauge from "@/components/visuals/SeverityGauge";
 
 import ThreatFlow from "@/components/visuals/ThreatFlow";
-import { getPipelineById } from "@/lib/mockData";
-import { usePipeline } from "@/hooks/usePipeline";
+import { useIncident } from "./layout";
 
 const containerVariants = {
 	hidden: { opacity: 0 },
@@ -38,107 +32,29 @@ const itemVariants = {
 };
 
 export default function IncidentPage() {
-	const params = useParams<{ id: string }>();
-	const incidentId = params?.id ?? "unknown";
-	const [apiPipeline, setApiPipeline] = useState<EventPipeline | null>(null);
-	const [refreshTrigger, setRefreshTrigger] = useState(0);
-	const uploadedPipeline = usePipeline();
+	const { pipeline } = useIncident();
 
-	const pipeline = useMemo(() => {
-		return apiPipeline || getPipelineById(incidentId, uploadedPipeline);
-	}, [apiPipeline, incidentId, uploadedPipeline]);
-
-	const [status, setStatus] = useState<"Open" | "Investigating" | "Closed">("Open");
-
-	useEffect(() => {
-		async function fetchIncident() {
-			try {
-				const res = await fetch(`/api/incidents/${incidentId}`);
-				if (res.ok) {
-					const data = await res.json();
-					setApiPipeline(data);
-				}
-			} catch (err) {
-				console.error("Error fetching incident details:", err);
-			}
+	// ai_analysis.impact holds CIA *levels* ("high"/"low"), which read as nonsense in
+	// the attack-chain sentence (e.g. "resulting in low."). Build a real phrase from
+	// which dimensions are high-impact.
+	const impactDesc = (() => {
+		const imp = pipeline?.ai_analysis?.impact as Record<string, unknown> | undefined;
+		if (imp) {
+			const high = ["confidentiality", "integrity", "availability"].filter(
+				(k) => String(imp[k] ?? "").toLowerCase() === "high",
+			);
+			if (high.length === 3) return "confidentiality, integrity & availability loss";
+			if (high.length > 0) return high.join(" & ") + " loss";
 		}
-		fetchIncident();
-	}, [incidentId, refreshTrigger]);
-
-	useEffect(() => {
-		if (pipeline) {
-			const s = String(pipeline.final_report?.status ?? pipeline.status ?? "Open").toLowerCase();
-			if (s === "closed") {
-				setStatus("Closed");
-			} else if (s === "investigating") {
-				setStatus("Investigating");
-			} else {
-				setStatus("Open");
-			}
-		}
-	}, [pipeline]);
-
-	const handleStatusChange = async (newStatus: "Open" | "Investigating" | "Closed") => {
-		setStatus(newStatus);
-		try {
-			const actionMap = {
-				Open: "open",
-				Investigating: "Investigate",
-				Closed: "close"
-			};
-			const response = await fetch(`/api/incidents/${incidentId}`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: actionMap[newStatus] }),
-			});
-			if (response.ok) {
-				setRefreshTrigger(prev => prev + 1);
-			}
-		} catch (err) {
-			console.error("Error updating status:", err);
-		}
-	};
-
-	const handleAction = async (action: "Block IP" | "Reset Password" | "Investigate") => {
-		if (action === "Investigate") {
-			setStatus("Investigating");
-			try {
-				const response = await fetch(`/api/incidents/${incidentId}`, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ action: "Investigate" }),
-				});
-				if (response.ok) {
-					setRefreshTrigger(prev => prev + 1);
-				}
-			} catch (err) {
-				console.error("Error triggering action:", err);
-			}
-		}
-	};
+		return "potential data exposure";
+	})();
 
 	return (
 		<motion.div
-			className="min-h-screen bg-slate-950"
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
 		>
-			{/* Sticky Header */}
-			<motion.div variants={itemVariants} className="sticky top-0 z-30">
-				<AlertSummaryPanel
-					pipeline={pipeline}
-					status={status}
-					onStatusChange={handleStatusChange}
-					onAction={handleAction}
-				/>
-			</motion.div>
-
-			{/* Navigation Tabs */}
-			<motion.div variants={itemVariants}>
-				<IncidentNavTabs incidentId={incidentId} />
-			</motion.div>
-
 			{/* Main Content: 12-Column Grid */}
 			<motion.div
 				variants={containerVariants}
@@ -179,7 +95,7 @@ export default function IncidentPage() {
 							sourceIp={pipeline?.dashboard?.source_ip}
 							threatType={pipeline?.detection?.threat_type}
 							affectedUser={pipeline?.dashboard?.affected_user}
-							impact={pipeline?.ai_analysis?.impact?.confidentiality || "Data Exposure"}
+							impact={impactDesc}
 						/>
 					</motion.div>
 

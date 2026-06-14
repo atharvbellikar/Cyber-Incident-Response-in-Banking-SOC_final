@@ -499,18 +499,49 @@ export function getScenarioPipeline(scenario: (typeof scenarioOptions)[number]["
 export const STORAGE_KEY = "soc_uploaded_pipeline";
 export const SIMULATION_EVENTS_KEY = "soc_simulated_events";
 
+// Cap retained local history so the simulation store cannot grow unbounded and
+// blow the ~5 MB localStorage quota. The backend DB remains the source of truth.
+const MAX_SIMULATED_EVENTS = 500;
+
 /**
  * Accumulate events from a simulation run into localStorage.
  * New events are MERGED with existing ones so history is retained across runs.
+ * Returns true on success, false if the write failed even after trimming (so the
+ * caller can warn the user). The backend DB is the authoritative store.
  */
-export function saveSimulatedEvents(events: EventPipeline[]): void {
+export function saveSimulatedEvents(events: EventPipeline[]): boolean {
+  if (typeof window === "undefined") return false;
+  // Load whatever is already stored and merge new events on top
+  const existing = readSimulatedEventsMap();
+  events.forEach((e) => { existing[e.event_id] = e; });
+  // Keep only the most recent N events (object key order is insertion order).
+  const cap = (n: number) => Object.fromEntries(Object.entries(existing).slice(-n));
+  const primary = Object.keys(existing).length > MAX_SIMULATED_EVENTS ? cap(MAX_SIMULATED_EVENTS) : existing;
+  try {
+    localStorage.setItem(SIMULATION_EVENTS_KEY, JSON.stringify(primary));
+    return true;
+  } catch {
+    // Quota exceeded — retry with an aggressively trimmed set before giving up.
+    try {
+      localStorage.setItem(SIMULATION_EVENTS_KEY, JSON.stringify(cap(50)));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
+/** Update the stored status of a single simulated event (best-effort). */
+export function updateSimulatedEventStatus(eventId: string, status: string): void {
   if (typeof window === "undefined") return;
   try {
-    // Load whatever is already stored and merge new events on top
-    const existing = readSimulatedEventsMap();
-    events.forEach((e) => { existing[e.event_id] = e; });
-    localStorage.setItem(SIMULATION_EVENTS_KEY, JSON.stringify(existing));
-  } catch { /* quota exceeded — ignore */ }
+    const map = readSimulatedEventsMap();
+    const ev = map[eventId] as (EventPipeline & { final_report?: { status?: string }; status?: string }) | undefined;
+    if (!ev) return;
+    ev.final_report = { ...(ev.final_report ?? {}), status };
+    ev.status = status;
+    localStorage.setItem(SIMULATION_EVENTS_KEY, JSON.stringify(map));
+  } catch { /* best-effort */ }
 }
 
 /** Wipe all accumulated simulation history from localStorage. */

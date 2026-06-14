@@ -33,10 +33,16 @@ export default function IncidentNavTabs({ incidentId }: IncidentNavTabsProps) {
           const isActive = pathname === href;
 
           return (
-            <Link key={tab.path} href={href}>
-              <motion.button
+            <Link
+              key={tab.path}
+              href={href}
+              aria-current={isActive ? "page" : undefined}
+            >
+              {/* span (not button) — a <button> nested in the Link's <a> is invalid
+                  nested-interactive HTML. The Link provides the click target. */}
+              <motion.span
                 className={cn(
-                  "relative px-4 py-3 text-sm font-semibold uppercase tracking-widest transition",
+                  "relative inline-block px-4 py-3 text-sm font-semibold uppercase tracking-widest transition",
                   isActive
                     ? "text-slate-100"
                     : "text-slate-400 hover:text-slate-300"
@@ -51,7 +57,7 @@ export default function IncidentNavTabs({ incidentId }: IncidentNavTabsProps) {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}
-              </motion.button>
+              </motion.span>
             </Link>
           );
         })}

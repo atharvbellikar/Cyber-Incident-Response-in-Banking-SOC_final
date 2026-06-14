@@ -31,6 +31,7 @@ import {
   type AnalystFeedbackRecord,
   FEEDBACK_REASON_LABELS,
 } from "@/lib/api";
+import { formatTimestamp } from "@/lib/format";
 
 type Props = {
   pipeline: EventPipeline | null;
@@ -229,6 +230,35 @@ export default function ResponseCard({ pipeline, onAction, onFalsePositive, onSt
 
 
 
+          {/* Analyst Classification — submit TP/FP/FN/Escalated feedback */}
+          <div className="rounded border border-slate-700/60 bg-slate-950/60 p-3">
+            <p className="mb-3 text-[10px] uppercase tracking-[0.14em] text-slate-400 flex items-center gap-1.5">
+              <ShieldCheck className="h-3 w-3" /> Analyst Classification
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(LABEL_CONFIG) as FeedbackLabel[]).map((key) => {
+                const cfg = LABEL_CONFIG[key];
+                const Icon = cfg.icon;
+                // Static class strings so Tailwind's JIT generates them.
+                const styles: Record<string, string> = {
+                  emerald: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20",
+                  amber:   "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20",
+                  orange:  "border-orange-500/40 bg-orange-500/10 text-orange-300 hover:bg-orange-500/20",
+                  sky:     "border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20",
+                };
+                return (
+                  <button
+                    key={key}
+                    onClick={() => openFeedbackModal(key)}
+                    className={`flex items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${styles[cfg.color] ?? styles.sky}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" /> {cfg.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Feedback message */}
           {feedback && (
             <div
@@ -253,11 +283,28 @@ export default function ResponseCard({ pipeline, onAction, onFalsePositive, onSt
               <ul className="space-y-2">
                 {feedbackHistory.slice(0, 3).map((record) => {
                   const cfg = LABEL_CONFIG[record.label as FeedbackLabel];
+                  // Static class strings so Tailwind's JIT generates them
+                  // (dynamic `bg-${color}-400` interpolation is never emitted).
+                  const dotColor: Record<string, string> = {
+                    emerald: "bg-emerald-400",
+                    amber:   "bg-amber-400",
+                    orange:  "bg-orange-400",
+                    sky:     "bg-sky-400",
+                    slate:   "bg-slate-400",
+                  };
+                  const textColor: Record<string, string> = {
+                    emerald: "text-emerald-300",
+                    amber:   "text-amber-300",
+                    orange:  "text-orange-300",
+                    sky:     "text-sky-300",
+                    slate:   "text-slate-300",
+                  };
+                  const color = cfg?.color ?? "slate";
                   return (
                     <li key={record.feedback_id} className="flex items-start gap-2 text-xs">
-                      <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full bg-${cfg?.color ?? "slate"}-400`} />
+                      <span className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${dotColor[color] ?? dotColor.slate}`} />
                       <div className="min-w-0">
-                        <span className={`font-medium text-${cfg?.color ?? "slate"}-300`}>
+                        <span className={`font-medium ${textColor[color] ?? textColor.slate}`}>
                           {cfg?.label ?? record.label}
                         </span>
                         {record.reason && (
@@ -267,7 +314,7 @@ export default function ResponseCard({ pipeline, onAction, onFalsePositive, onSt
                           <p className="mt-0.5 truncate text-slate-500 italic">&ldquo;{record.analyst_notes}&rdquo;</p>
                         )}
                         <p className="text-[10px] text-slate-600">
-                          {new Date(record.created_at).toLocaleString()}
+                          {formatTimestamp(record.created_at)}
                         </p>
                       </div>
                     </li>
@@ -297,23 +344,6 @@ export default function ResponseCard({ pipeline, onAction, onFalsePositive, onSt
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function LabelBadge({ label }: { label: FeedbackLabel }) {
-  const cfg = LABEL_CONFIG[label];
-  const Icon = cfg.icon;
-  const colorMap: Record<string, string> = {
-    emerald: "border-emerald-500/40 text-emerald-300 bg-emerald-500/10",
-    amber:   "border-amber-500/40 text-amber-300 bg-amber-500/10",
-    orange:  "border-orange-500/40 text-orange-300 bg-orange-500/10",
-    sky:     "border-sky-500/40 text-sky-300 bg-sky-500/10",
-  };
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-xs font-medium ${colorMap[cfg.color] ?? ""}`}>
-      <Icon className="h-3 w-3" />
-      {cfg.label}
-    </span>
-  );
-}
 
 type ModalProps = {
   label: FeedbackLabel;

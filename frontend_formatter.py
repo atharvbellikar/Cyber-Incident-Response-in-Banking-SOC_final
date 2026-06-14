@@ -105,9 +105,37 @@ def format_pipeline_for_frontend(parsed_logs, layer1_output, layer2_output, laye
         # Correlation Analysis
         formatted["correlation_analysis"] = event_dict.get("correlation_analysis", {})
         
-        # CIS Benchmark
-        formatted["cis"] = event_dict.get("cis_benchmark", {})
-        if not formatted["cis"]:
+        # CIS Benchmark — Layer 3 emits {framework, retrieval_query, matched_benchmarks:[...]}
+        # where the real control lives in matched_benchmarks[0]. The frontend reads
+        # cis.title / cis.benchmark_id / cis.remediation at the TOP level, so promote
+        # the best matched benchmark up while keeping the full list for the detail view.
+        cis_block = event_dict.get("cis_benchmark", {}) or {}
+        matched = cis_block.get("matched_benchmarks") or []
+        if matched:
+            top = matched[0] or {}
+            formatted["cis"] = {
+                **cis_block,
+                "benchmark_id": top.get("benchmark_id"),
+                "title": top.get("title"),
+                "description": top.get("description"),
+                "remediation": top.get("remediation"),
+                "section": top.get("section"),
+                "framework": top.get("framework") or cis_block.get("framework"),
+                "matched_benchmarks": matched,
+            }
+        elif cis_block:
+            # Routed to a domain engine but no catalog entry matched the signals
+            # (e.g. the IoT catalog has no tags/keywords yet). Be honest rather
+            # than fabricating a control.
+            formatted["cis"] = {
+                **cis_block,
+                "benchmark_id": cis_block.get("benchmark_id") or "N/A",
+                "title": cis_block.get("title") or "No specific CIS control matched",
+                "description": cis_block.get("description") or "No catalog entry matched the detected signals for this event.",
+                "remediation": cis_block.get("remediation") or "Review the event manually against the applicable CIS benchmark.",
+            }
+        else:
+            # Event was not routed (unknown log family) — generic monitoring guidance.
             formatted["cis"] = {
                 "benchmark_id": "CIS-16",
                 "framework": "CIS Controls",
@@ -137,6 +165,69 @@ def format_pipeline_for_frontend(parsed_logs, layer1_output, layer2_output, laye
         "total_events": len(frontend_results),
         "events": frontend_results
     }
+
+def build_dashboard_block(event: dict) -> dict:
+    """
+    Build the compact 'dashboard' summary block the frontend header / incident
+    detail views read directly (alert_title, severity, cvss_score, source_ip,
+    affected_user). Call this AFTER cvss/response enrichment so the severity and
+    score reflect the final CVSS result. All values are derived from the event.
+    """
+    raw = event.get("raw_event", {}) or {}
+    detection = event.get("detection", {}) or {}
+    cvss = event.get("cvss", {}) or {}
+    ai = event.get("ai_analysis", {}) or {}
+
+    severity = str(cvss.get("severity") or detection.get("severity") or "low").lower()
+    threat = str(detection.get("threat_type") or "event").replace("_", " ").title()
+    alert_title = event.get("summary") or ai.get("intent") or f"{threat} Detected"
+
+    return {
+        "alert_title": alert_title,
+        "severity": severity,                       # canonical, CVSS-derived
+        "threat_type": detection.get("threat_type") or "unknown",
+        "cvss_score": cvss.get("base_score") or 0,
+        "source_ip": raw.get("source_ip") or "unknown",
+        "affected_user": raw.get("affected_user") or raw.get("user") or raw.get("affected_host") or "unknown",
+    }
+
+
+def build_final_report(event: dict) -> dict:
+    """
+    Build the 'final_report' block (owner / status / timeline / summary) shown on
+    the incident Report view. Previously left as {} so the UI rendered an empty
+    object and 'N/A' owner/status. All values are derived from the enriched event.
+    Call AFTER cvss/response enrichment.
+    """
+    detection = event.get("detection", {}) or {}
+    cvss = event.get("cvss", {}) or {}
+    cis = event.get("cis", {}) or {}
+    ai = event.get("ai_analysis", {}) or {}
+    response = event.get("response", {}) or {}
+
+    severity = str(cvss.get("severity") or detection.get("severity") or "low").lower()
+    owner = "SOC Tier-2" if severity in ("high", "critical") else "SOC Tier-1"
+
+    threat = str(detection.get("threat_type") or "activity").replace("_", " ")
+    timeline = [
+        "Telemetry ingested & normalized (Layer 1)",
+        f"Detection: {threat} (confidence {round(float(detection.get('confidence') or 0) * 100)}%) (Layer 2)",
+    ]
+    if cis.get("benchmark_id"):
+        timeline.append(f"CIS control mapped: {cis.get('benchmark_id')} — {cis.get('title')} (Layer 3)")
+    timeline.append(f"CVSS scored: {cvss.get('base_score', 'N/A')} ({severity}) (Layer 5)")
+    if response.get("priority"):
+        timeline.append(f"Response prioritized: {response.get('priority')} (Layer 6)")
+    timeline.append("Awaiting analyst review")
+
+    return {
+        "owner": owner,
+        "status": str(event.get("status") or "open").lower(),
+        "priority": response.get("priority") or "P3",
+        "summary": ai.get("summary") or event.get("summary") or "",
+        "timeline": timeline,
+    }
+
 
 def add_advisor_agent_to_event(event):
     detection = event.get("detection") or {}

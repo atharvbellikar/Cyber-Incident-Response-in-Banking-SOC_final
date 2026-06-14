@@ -4,9 +4,20 @@ from layer_3_cis.engines.iot_engine import process_iot_event
 
 
 def route_entry(event: dict) -> dict:
-    log_type = event.get("log_type", "").lower()  # <-- add .lower() here
-    threat_type = event.get("detection", {}).get("threat_type", "").lower()
-    # rest unchanged
+    # Layer-2 output does not carry a top-level "log_type"; the log family lives
+    # under raw_event.log_type / log_family / classification. Derive it from
+    # whichever is present so events actually route to the domain engines
+    # instead of silently falling through to the no-op fallback.
+    raw_event = event.get("raw_event", {}) or {}
+    log_type = (
+        event.get("log_type")
+        or raw_event.get("log_type")
+        or event.get("log_family")
+        or raw_event.get("log_family")
+        or ""
+    )
+    log_type = str(log_type).lower()
+    threat_type = str((event.get("detection", {}) or {}).get("threat_type", "") or "").lower()
 
     # 🔥 NEW LOGIC (THIS FIXES YOUR PIPELINE)
 

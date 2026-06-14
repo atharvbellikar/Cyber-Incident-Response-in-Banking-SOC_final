@@ -1,73 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BACKEND_URL, backendHeaders, safeId } from "@/lib/backend";
 
-type Params = {
-  params: Promise<{ id: string }>;
-};
+type Params = { params: Promise<{ id: string }> };
 
-type IncidentAction = "true_positive" | "false_positive" | "escalate" | "contain" | "close" | "Closed" | "Investigate" | "open" | "Open";
+// Incident reads/mutations must always hit the live backend, never a static cache.
+export const dynamic = "force-dynamic";
 
-function isIncidentAction(value: unknown): value is IncidentAction {
-  return (
-    value === "true_positive" ||
-    value === "false_positive" ||
-    value === "escalate" ||
-    value === "contain" ||
-    value === "close" ||
-    value === "Closed" ||
-    value === "Investigate" ||
-    value === "open" ||
-    value === "Open"
-  );
-}
+const ALLOWED_ACTIONS = new Set([
+  "true_positive", "false_positive", "escalate", "contain",
+  "close", "Closed", "Investigate", "investigating", "Investigating", "open", "Open",
+]);
 
-export async function GET(request: NextRequest, context: Params) {
+export async function GET(_request: NextRequest, context: Params) {
   const { id } = await context.params;
-
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/incidents/${id}`, { cache: "no-store" });
+    const res = await fetch(`${BACKEND_URL}/api/incidents/${safeId(id)}`, {
+      cache: "no-store",
+      headers: backendHeaders(),
+    });
     if (!res.ok) {
-      return NextResponse.json({ error: `Backend returned error: ${res.status}` }, { status: res.status });
+      // Forward the backend's real message/status (e.g. 404 {"message":"Incident not found"})
+      // under both keys so the UI can surface the actual reason.
+      const err = (await res.json().catch(() => ({}))) as { message?: string; detail?: string; error?: string };
+      const reason = err.message || err.detail || err.error || `Backend returned error: ${res.status}`;
+      return NextResponse.json({ error: reason, message: reason }, { status: res.status });
     }
-    const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(await res.json());
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[incidents/[id] proxy GET] Error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Could not reach the SOC backend." }, { status: 502 });
   }
 }
 
 export async function POST(request: NextRequest, context: Params) {
   const { id } = await context.params;
-
   try {
     const body = (await request.json()) as { action?: unknown };
-
-    if (!isIncidentAction(body.action)) {
-      return NextResponse.json(
-        { message: "Invalid action." },
-        { status: 400 },
-      );
+    if (typeof body.action !== "string" || !ALLOWED_ACTIONS.has(body.action)) {
+      return NextResponse.json({ message: "Invalid action." }, { status: 400 });
     }
-
-    // Forward to FastAPI SQLite Database
-    const res = await fetch(`http://127.0.0.1:8000/api/incidents/${id}/action`, {
+    const res = await fetch(`${BACKEND_URL}/api/incidents/${safeId(id)}/action`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: backendHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ action: body.action }),
     });
-
     if (!res.ok) {
-      return NextResponse.json({ error: `Backend returned error: ${res.status}` }, { status: res.status });
+      // Forward the backend's real message/status (e.g. 404 {"message":"Incident not found"})
+      // under both keys so the UI can surface the actual reason.
+      const err = (await res.json().catch(() => ({}))) as { message?: string; detail?: string; error?: string };
+      const reason = err.message || err.detail || err.error || `Backend returned error: ${res.status}`;
+      return NextResponse.json({ error: reason, message: reason }, { status: res.status });
     }
-
-    const data = await res.json();
-    return NextResponse.json(data);
+    return NextResponse.json(await res.json());
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[incidents/[id] proxy POST] Error:", msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "Could not reach the SOC backend." }, { status: 502 });
   }
 }

@@ -3,11 +3,29 @@ import os
 from .ioc_utils import normalize_text
 
 
-IOC_FEED_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "mappings",
-    "ioc_feed.json"
-)
+_LAYER2_DIR = os.path.dirname(os.path.dirname(__file__))
+
+# Prefer the populated feed shipped at the layer root; fall back to the
+# mappings/ copy if present and non-empty. The original path pointed only at
+# mappings/ioc_feed.json, which is an empty (0-byte) placeholder, so IOC
+# matching never fired. Pick the first path that actually has content.
+_CANDIDATE_FEEDS = [
+    os.path.join(_LAYER2_DIR, "ioc_feed.json"),
+    os.path.join(_LAYER2_DIR, "mappings", "ioc_feed.json"),
+]
+
+
+def _resolve_feed_path() -> str:
+    for path in _CANDIDATE_FEEDS:
+        try:
+            if os.path.exists(path) and os.path.getsize(path) > 0:
+                return path
+        except OSError:
+            continue
+    return _CANDIDATE_FEEDS[0]
+
+
+IOC_FEED_PATH = _resolve_feed_path()
 
 
 def load_ioc_feed() -> list[dict]:

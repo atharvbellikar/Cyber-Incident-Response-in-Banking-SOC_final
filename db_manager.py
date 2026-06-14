@@ -4,12 +4,26 @@ import os
 from pathlib import Path
 from datetime import datetime, timezone
 
-DB_FILE = Path(__file__).resolve().parent / "soc_incidents.db"
+try:
+    from settings import DB_FILE as _CONFIGURED_DB
+    DB_FILE = Path(_CONFIGURED_DB)
+except Exception:
+    DB_FILE = Path(__file__).resolve().parent / "soc_incidents.db"
+
 JSON_FILE = Path(__file__).resolve().parent / "frontend_output.json"
 
 def get_db_connection():
-    conn = sqlite3.connect(str(DB_FILE))
+    # WAL + busy_timeout let readers and a writer coexist without immediate
+    # 'database is locked' errors under concurrent API requests.
+    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_FILE), timeout=30.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=30000")
+        conn.execute("PRAGMA synchronous=NORMAL")
+    except sqlite3.Error:
+        pass
     return conn
 
 def init_db():
@@ -116,7 +130,10 @@ def save_incident_with_cursor(cursor, event, overwrite=True):
     final_report = event.get("final_report", {}) or {}
     
     timestamp = raw_event.get("timestamp") or ingestion.get("timestamp") or ""
-    severity = detection.get("severity") or dashboard.get("severity") or "low"
+    # Canonical incident severity is the CVSS-derived one carried on the dashboard
+    # block (consistent with the header/list/report views); fall back to the
+    # detector's own rating only if the dashboard block is absent.
+    severity = dashboard.get("severity") or detection.get("severity") or "low"
     threat_type = detection.get("threat_type") or "unknown"
     affected_user = dashboard.get("affected_user") or raw_event.get("affected_user") or raw_event.get("user") or "anonymous"
     affected_host = raw_event.get("affected_host") or raw_event.get("host") or raw_event.get("hostname") or "workstation"

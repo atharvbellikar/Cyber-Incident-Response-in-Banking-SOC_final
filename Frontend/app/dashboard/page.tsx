@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { EventPipeline, getAllMockPipelines, readSimulatedEvents, clearSimulatedEvents } from "@/lib/mockData";
+import { EventPipeline, readSimulatedEvents, clearSimulatedEvents, updateSimulatedEventStatus } from "@/lib/mockData";
 import { severityTone } from "@/lib/utils";
 import { usePipeline } from "@/hooks/usePipeline";
 import {
@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import TemporalSparkline from "@/components/visuals/TemporalSparkline";
 import EventFrequencyBars from "@/components/visuals/EventFrequencyBars";
+import { formatTimeOnly } from "@/lib/format";
 
 type JsonEvent = Record<string, any>;
 
@@ -42,8 +43,16 @@ function normalizeSeverity(value: string | undefined | null): string {
   return ["critical", "high", "medium", "low"].includes(n) ? n : "low";
 }
 
+/** Best available event time: backend may populate either raw_event.timestamp or
+ *  ingestion.timestamp (some real incidents have only the latter). */
+function eventTime(event: JsonEvent): string {
+  return event?.raw_event?.timestamp ?? event?.ingestion?.timestamp ?? "";
+}
+
 function normalizeEventToPipeline(event: JsonEvent, index: number): EventPipeline {
-  const severity = normalizeSeverity(event?.detection?.severity || event?.dashboard?.severity);
+  // Trust the backend's computed dashboard.severity first; only fall back to the
+  // raw detection severity for sim/legacy events that lack a dashboard block.
+  const severity = normalizeSeverity(event?.dashboard?.severity || event?.detection?.severity);
   const eventId = event?.event_id || event?.incident_id || `evt-json-${index + 1}`;
   const alertTitle =
     event?.dashboard?.alert_title ||
@@ -63,9 +72,14 @@ function normalizeEventToPipeline(event: JsonEvent, index: number): EventPipelin
     event?.summary ||
     "Investigation context available in incident workspace.";
   const status = String(event?.final_report?.status ?? event?.status ?? "open").toLowerCase();
+  const ts = eventTime(event);
   return {
     ...(event as EventPipeline),
     event_id: eventId,
+    // Coalesce the event time so cards/sort always have a value even when the
+    // backend only populated one of raw_event.timestamp / ingestion.timestamp.
+    raw_event: { ...(event?.raw_event ?? {}), timestamp: event?.raw_event?.timestamp ?? ts },
+    ingestion: { ...(event?.ingestion ?? {}), timestamp: event?.ingestion?.timestamp ?? ts },
     dashboard: { ...(event?.dashboard ?? {}), alert_title: alertTitle, severity, affected_user: affectedUser, source_ip: sourceIp },
     ai_analysis: { ...(event?.ai_analysis ?? {}), one_liner: event?.ai_analysis?.one_liner ?? aiSummary, summary: event?.ai_analysis?.summary ?? aiSummary },
     final_report: { ...(event?.final_report ?? {}), status },
@@ -85,49 +99,47 @@ export default function DashboardPage() {
   const [jsonPipelines, setJsonPipelines] = useState<EventPipeline[]>([]);
   const [simPipelines, setSimPipelines] = useState<EventPipeline[]>([]);
   const [jsonLoaded, setJsonLoaded] = useState(false);
+  const [jsonError, setJsonError] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [expandedIncidents, setExpandedIncidents] = useState<Record<string, boolean>>({});
   const [localStatus, setLocalStatus] = useState<Record<string, string>>({});
 
-  const loadSims = async () => {
+  const loadSims = () => {
+    // Sims are already persisted server-side at creation time (upload/page.tsx
+    // calls saveSimulatedEvents + POST /api/simulate). Re-POSTing every mount
+    // caused dual-ownership churn, so here we only read for local display.
     const sims = readSimulatedEvents();
-    if (sims.length > 0) {
-      try {
-        await fetch("/api/simulate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ events: sims }),
-        });
-      } catch (err) {
-        console.error("Error syncing simulated events:", err);
-      }
-    }
-    sims.sort((a, b) => ((b as any)?.raw_event?.timestamp ?? "").localeCompare((a as any)?.raw_event?.timestamp ?? ""));
+    const t = (e: EventPipeline) => eventTime(e as JsonEvent);
+    sims.sort((a, b) => t(b).localeCompare(t(a)));
     setSimPipelines(sims);
   };
 
   useEffect(() => { loadSims(); }, []);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function load() {
-      try {
-        const res = await fetch("/api/incidents", { cache: "no-store" });
-        if (!res.ok) throw new Error(`${res.status}`);
-        const data = await res.json();
-        if (!isMounted) return;
-        const raw = Array.isArray(data) ? data : Array.isArray(data?.events) ? data.events : [];
-        setJsonPipelines(raw.map((e: JsonEvent, i: number) => normalizeEventToPipeline(e, i)));
-      } catch { if (isMounted) setJsonPipelines([]); }
-      finally { if (isMounted) setJsonLoaded(true); }
-    }
-    load();
-    return () => { isMounted = false; };
+  // Pull the authoritative incident list from the backend. Reusable so a status
+  // toggle can re-sync the real state after mutating it.
+  const reloadJson = useCallback(async () => {
+    try {
+      const res = await fetch("/api/incidents", { cache: "no-store" });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      const raw = Array.isArray(data) ? data : Array.isArray(data?.events) ? data.events : [];
+      setJsonPipelines(raw.map((e: JsonEvent, i: number) => normalizeEventToPipeline(e, i)));
+      setJsonError(false);
+    } catch { setJsonPipelines([]); setJsonError(true); }
+    finally { setJsonLoaded(true); }
   }, []);
 
+  useEffect(() => { reloadJson(); }, [reloadJson]);
+
   const handleClearHistory = async () => {
+    if (typeof window !== "undefined" &&
+        !window.confirm("Clear ALL incident history? This permanently deletes backend incidents and local simulations.")) {
+      return;
+    }
+    // Purge BOTH sources: backend DB and localStorage sims.
     try { await fetch("/api/incidents", { method: "DELETE" }); } catch {}
     clearSimulatedEvents();
     setSimPipelines([]);
@@ -140,23 +152,37 @@ export default function DashboardPage() {
   const handleToggleStatus = async (e: React.MouseEvent, id: string, cur: string) => {
     e.stopPropagation();
     const next = cur === "closed" ? "open" : "closed";
-    setLocalStatus((p) => ({ ...p, [id]: next }));
+    setLocalStatus((p) => ({ ...p, [id]: next })); // optimistic
     try {
-      await fetch(`/api/incidents/${id}`, {
+      const res = await fetch(`/api/incidents/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: next === "closed" ? "close" : "open" }),
       });
+      if (!res.ok) throw new Error(`${res.status}`);
+      // Reconcile so the change survives a reload: persist to the localStorage sim
+      // copy (if any) and re-pull the DB source, then drop the optimistic override.
+      updateSimulatedEventStatus(id, next);
+      loadSims();
+      await reloadJson();
+      setLocalStatus((p) => { const n = { ...p }; delete n[id]; return n; });
     } catch {
-      setLocalStatus((p) => ({ ...p, [id]: cur }));
+      setLocalStatus((p) => ({ ...p, [id]: cur })); // revert on failure
     }
   };
 
   const incidents = useMemo(() => {
-    const mock = getAllMockPipelines();
-    const base = jsonPipelines.length > 0 ? jsonPipelines : simPipelines.length > 0 ? simPipelines : mock;
-    let list = base;
-    if (uploadedPipeline) list = [uploadedPipeline, ...base.filter((i) => i.event_id !== uploadedPipeline.event_id)];
+    // Production: show ONLY real backend incidents + localStorage sims. Never
+    // substitute bundled mock/demo incidents as if they were real.
+    //
+    // MERGE both sources deduped by event_id so nothing silently disappears:
+    // seed with sims, then overlay DB rows (DB wins on conflict, since a sim that
+    // was also persisted should display the canonical server-side version).
+    const byId = new Map<string, EventPipeline>();
+    simPipelines.forEach((s) => byId.set(s.event_id, s));
+    jsonPipelines.forEach((j) => byId.set(j.event_id, j));
+    let list = [...byId.values()];
+    if (uploadedPipeline) list = [uploadedPipeline, ...list.filter((i) => i.event_id !== uploadedPipeline.event_id)];
     return list;
   }, [uploadedPipeline, jsonPipelines, simPipelines]);
 
@@ -242,7 +268,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {simPipelines.length > 0 && (
+            {incidents.length > 0 && (
               <button
                 id="btn-clear-history"
                 onClick={handleClearHistory}
@@ -308,18 +334,45 @@ export default function DashboardPage() {
             <span>
               Showing <span className="font-semibold text-slate-300">{filteredIncidents.length}</span> of {incidents.length} incidents
             </span>
-            {jsonLoaded ? (
+            {!jsonLoaded ? (
+              <span className="text-slate-600">Connecting…</span>
+            ) : jsonError ? (
+              <span className="flex items-center gap-1.5 text-red-500/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                Pipeline sync offline
+              </span>
+            ) : (
               <span className="flex items-center gap-1.5 text-emerald-500/80">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Pipeline sync online
               </span>
-            ) : (
-              <span className="text-slate-600">Connecting…</span>
             )}
           </div>
 
+          {/* Non-blocking backend-unreachable warning shown even when cached sims exist */}
+          {jsonError && incidents.length > 0 && (
+            <div className="flex items-center gap-2 rounded-lg border border-amber-900/50 bg-amber-950/20 px-3 py-2 text-[11px] text-amber-300">
+              <AlertOctagon className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+              <span>SOC backend unreachable — showing cached local simulations. Live incidents may be missing.</span>
+            </div>
+          )}
+
           {/* Cards */}
-          {filteredIncidents.length === 0 ? (
+          {jsonError && incidents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-red-900/50 bg-red-950/20 py-16 text-center">
+              <AlertOctagon className="mb-3 h-10 w-10 text-red-500/70" />
+              <p className="text-sm font-semibold text-red-300">SOC backend unreachable</p>
+              <p className="mt-1 max-w-xs text-xs text-slate-400">
+                Could not load incidents from the pipeline backend. Confirm the API is running, then retry.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 rounded-lg bg-cyan-500 px-4 py-1.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-400"
+              >
+                Retry
+              </button>
+            </div>
+          ) : filteredIncidents.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-950/40 py-16 text-center">
               <ShieldCheck className="mb-3 h-10 w-10 text-slate-700" />
               <p className="text-sm font-semibold text-slate-300">All Clear in Banking Operations</p>
@@ -328,8 +381,8 @@ export default function DashboardPage() {
               </p>
             </div>
           ) : (
-            <AnimatePresence>
-              <div className="space-y-3">
+            <div className="space-y-3">
+              <AnimatePresence>
                 {filteredIncidents.map((incident) => {
                   const id = incident.event_id;
                   const isExpanded = !!expandedIncidents[id];
@@ -341,7 +394,7 @@ export default function DashboardPage() {
 
                   // AI Triage data
                   const aiIntent = incident.ai_analysis?.intent || incident.detection?.threat_type?.replaceAll("_", " ") || "Unknown Intent";
-                  const aiConfidence = Math.round((incident.detection?.confidence ?? incident.ai_analysis?.confidence ?? 0.75) * 100);
+                  const aiConfidence = Math.round((incident.detection?.confidence ?? 0.75) * 100);
                   const aiNarrative = incident.ai_analysis?.one_liner || incident.ai_analysis?.summary || "AI analysis complete.";
                   const aiConf = incident.ai_analysis?.impact?.confidentiality?.split(" ")[0] || "HIGH";
                   const aiInteg = incident.ai_analysis?.impact?.integrity?.split(" ")[0] || "HIGH";
@@ -420,7 +473,9 @@ export default function DashboardPage() {
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {incident.raw_event?.timestamp ? new Date(incident.raw_event.timestamp).toLocaleTimeString() : "Recent"}
+                              {(incident.raw_event?.timestamp ?? incident.ingestion?.timestamp)
+                                ? formatTimeOnly(incident.raw_event?.timestamp ?? incident.ingestion?.timestamp)
+                                : "Recent"}
                             </span>
                           </div>
 
@@ -566,10 +621,10 @@ export default function DashboardPage() {
                                     <MiniStat label="Deviation" value={(incident.feature_engineering?.behavioral_features?.deviation_score || 0.85).toFixed(2)} />
                                     <div className="col-span-2 rounded-md bg-slate-900/80 px-2 py-1.5 border border-slate-800/60">
                                       <span className="block text-slate-600">Traffic Direction</span>
-                                      <span className="font-bold uppercase text-slate-300">{incident.feature_engineering?.network_traffic_features?.traffic_direction || "North-South"}</span>
+                                      <span className="font-bold uppercase text-slate-300">{incident.feature_engineering?.network_traffic_features?.traffic_direction || "N/A"}</span>
                                     </div>
                                   </div>
-                                  <DetailField label="Anomaly Model (L2)" value={incident.anomaly_detection?.model || "AutoEncoder-ML"} />
+                                  <DetailField label="Anomaly Level (L2)" value={String(incident.anomaly_detection?.anomaly_level || "n/a").toUpperCase()} />
                                   <div className="flex items-center justify-between -mt-1">
                                     <span className="text-[10px] text-slate-500">Score</span>
                                     <span className="rounded border border-red-500/20 bg-red-500/10 px-1.5 py-0.5 text-[9px] font-bold text-red-400">
@@ -583,11 +638,13 @@ export default function DashboardPage() {
 
                                 {/* L3 + L4 */}
                                 <DetailPanel title="Threats & Alignment" titleColor="text-pink-400" icon={<Brain className="h-3.5 w-3.5" />}>
-                                  <DetailLabel>MITRE TTP Objectives (L2)</DetailLabel>
+                                  <DetailLabel>Triggered Detection Engines (L2)</DetailLabel>
                                   <div className="flex flex-wrap gap-1">
-                                    {(incident.threat_analysis?.mitre_tactics || ["Execution"]).map((t: string) => (
-                                      <span key={t} className="rounded border border-slate-700/60 bg-slate-900/80 px-1.5 py-0.5 text-[9px] font-bold text-slate-300">{t}</span>
-                                    ))}
+                                    {((incident.detection?.triggered_engines && incident.detection.triggered_engines.length > 0
+                                      ? incident.detection.triggered_engines
+                                      : [incident.detection?.threat_type || "detection"]).map((t: string) => (
+                                      <span key={t} className="rounded border border-slate-700/60 bg-slate-900/80 px-1.5 py-0.5 text-[9px] font-bold text-slate-300">{t.replace(/_/g, " ")}</span>
+                                    )))}
                                   </div>
                                   <DetailLabel>CIS Security Framework (L3)</DetailLabel>
                                   <div className="flex items-center gap-2">
@@ -644,7 +701,7 @@ export default function DashboardPage() {
                                   <Sparkles className="h-3.5 w-3.5 fill-current" /> AI Security Narrative & Incident Reconstruction
                                 </p>
                                 <p className="text-xs leading-relaxed text-slate-400 text-justify">
-                                  {incident.ai_analysis?.narrative || incident.summary}
+                                  {incident.ai_analysis?.narrative || incident.ai_analysis?.summary}
                                 </p>
                               </div>
 
@@ -678,8 +735,8 @@ export default function DashboardPage() {
                     </motion.div>
                   );
                 })}
-              </div>
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
           )}
         </section>
 

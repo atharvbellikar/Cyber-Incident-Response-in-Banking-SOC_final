@@ -307,64 +307,71 @@ Cyber-Incident-Response-in-Banking-SOC_final/
 
 ## How to Run the Project
 
-### 1. Clone the Repository
+### Prerequisites
+
+* **Python 3.11+** and **Node.js 18+** (tested on Python 3.13 / Node 22)
+* *(Optional)* **Ollama** with the `mistral` model for the Layer-4 LLM analysis.
+  Without it, Layer 4 automatically falls back to deterministic rule-based
+  analysis — the pipeline still runs end-to-end.
+  ```bash
+  ollama pull mistral        # only if you want real LLM analysis
+  ```
+
+### Quickest start (one command)
+
+From the repo root, `./run.sh` sets up both venv + npm deps and launches the
+backend (:8000) and frontend (:3000). Add `--prod` for a production build/serve,
+`--seed` to pre-load demo data. Press Ctrl+C to stop.
 
 ```bash
-git clone https://github.com/atharvbellikar/Cyber-Incident-Response-in-Banking-SOC_final.git
-cd Cyber-Incident-Response-in-Banking-SOC_final
+./run.sh            # dev mode
+./run.sh --prod     # production: uvicorn workers + next build && next start
 ```
 
----
+### Manual setup
 
-### 2. Set Up the Backend
-
-Create a virtual environment:
+**1. Clone & configure**
 
 ```bash
-python -m venv .venv
+git clone <repo-url> && cd Cyber-Incident-Response-in-Banking-SOC_final
+cp .env.example .env          # adjust DB path, CORS origins, API key, Ollama URL…
 ```
 
-Activate the virtual environment on Windows:
+**2. Backend (FastAPI)**
 
 ```bash
-.\.venv\Scripts\activate
-```
-
-Install dependencies:
-
-```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .\.venv\Scripts\activate
 pip install -r requirements.txt
+uvicorn api_server:app --host 127.0.0.1 --port 8000
 ```
 
-Start the backend server:
+API docs: `http://127.0.0.1:8000/docs` · health: `http://127.0.0.1:8000/healthz`
 
-```bash
-uvicorn api_server:app --reload --host 127.0.0.1 --port 8000
-```
-
-Backend API documentation will be available at:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
----
-
-### 3. Set Up the Frontend
-
-Open a new terminal:
+**3. Frontend (Next.js)** — in a new terminal
 
 ```bash
 cd Frontend
 npm install
-npm run dev
+npm run dev                        # dev
+# or for production: npm run build && npm run start
 ```
 
-Open the frontend at:
+Open `http://localhost:3000` (redirects to the live dashboard).
 
-```text
-http://localhost:3000
+### Docker (production)
+
+```bash
+docker compose up --build          # backend :8000, frontend :3000, ollama :11434
+docker compose exec ollama ollama pull mistral   # optional, for LLM analysis
 ```
+
+### Configuration (environment variables)
+
+All deployment-specific settings are env-driven (see `.env.example`):
+`SOC_DB_PATH`, `SOC_CORS_ORIGINS`, `SOC_API_KEY` (enables `X-API-Key` auth on all
+endpoints when set), `SOC_MAX_UPLOAD_BYTES`, `SOC_MAX_EVENTS`, `OLLAMA_BASE_URL`,
+`OLLAMA_MODEL`, `SOC_LOG_LEVEL`; and for the frontend `BACKEND_URL` / `BACKEND_API_KEY`.
 
 ---
 

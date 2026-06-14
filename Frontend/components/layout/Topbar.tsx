@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useParams } from "next/navigation";
 import { ShieldCheck, Clock, UserCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getPipelineById } from "@/lib/mockData";
+import { getPipelineById, EventPipeline } from "@/lib/mockData";
 import { usePipeline } from "@/hooks/usePipeline";
 import { severityTone } from "@/lib/utils";
 
@@ -25,8 +25,26 @@ export default function Topbar() {
   }, []);
 
   const incidentId = Array.isArray(params?.id) ? params.id[0] : (params?.id as string | undefined);
-  const pipeline = useMemo(() => (incidentId ? getPipelineById(incidentId, uploadedPipeline) : null), [incidentId, uploadedPipeline]);
   const isIncidentPage = pathname.startsWith("/incident");
+
+  // Fetch the real incident from the backend (matches the detail pages). Without
+  // this the Topbar only consulted mock/localStorage via getPipelineById and so
+  // showed "No Incident / evt-empty" for genuinely ingested incidents.
+  const [apiPipeline, setApiPipeline] = useState<EventPipeline | null>(null);
+  useEffect(() => {
+    if (!incidentId) { setApiPipeline(null); return; }
+    let active = true;
+    fetch(`/api/incidents/${incidentId}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (active && d && !d.error) setApiPipeline(d as EventPipeline); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [incidentId]);
+
+  const pipeline = useMemo(
+    () => (incidentId ? (apiPipeline || getPipelineById(incidentId, uploadedPipeline)) : null),
+    [incidentId, apiPipeline, uploadedPipeline],
+  );
 
   const page = useMemo(() => {
     if (isIncidentPage && pipeline) {
@@ -77,11 +95,12 @@ export default function Topbar() {
             <span className="font-mono text-[11px] text-slate-500">{time}</span>
           </div>
 
-          {/* Analyst badge */}
-          <button className="flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-900/60 px-3 py-1.5 text-[11px] font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800/60">
+          {/* Analyst badge — decorative identity chip (no action wired), so
+              render as a non-interactive element without click affordances. */}
+          <div className="flex items-center gap-2 rounded-lg border border-slate-800/60 bg-slate-900/60 px-3 py-1.5 text-[11px] font-medium text-slate-300">
             <UserCircle2 className="h-4 w-4 text-sky-400" />
             Analyst
-          </button>
+          </div>
         </div>
       </div>
     </header>

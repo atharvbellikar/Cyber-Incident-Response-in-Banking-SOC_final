@@ -18,6 +18,15 @@ def parse_json_content(content: str) -> List[Dict[str, Any]]:
         raise ValueError(f"Invalid JSON: {str(e)}")
 
     if isinstance(parsed, dict):
+        # Unwrap a common envelope shape ({"events":[...]}, {"logs":[...]}, etc.)
+        # so the upload accepts the same {events:[]} contract the rest of the
+        # app emits, instead of mis-ingesting the wrapper as a single event.
+        for key in ("events", "logs", "records", "data"):
+            inner = parsed.get(key)
+            if isinstance(inner, list):
+                if not all(isinstance(item, dict) for item in inner):
+                    raise ValueError(f"'{key}' must contain only JSON objects")
+                return inner
         return [parsed]
 
     if isinstance(parsed, list):

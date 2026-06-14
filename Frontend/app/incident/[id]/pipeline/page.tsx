@@ -1,15 +1,11 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import AlertSummaryPanel from "@/components/cards/AlertSummaryPanel";
-import IncidentNavTabs from "@/components/shared/IncidentNavTabs";
 import CardBlock from "@/components/cards/CardBlock";
 import AttackTimeline from "@/components/visuals/AttackTimeline";
 import ThreatFlow from "@/components/visuals/ThreatFlow";
-import { getPipelineById, EventPipeline } from "@/lib/mockData";
-import { usePipeline } from "@/hooks/usePipeline";
+import { formatTimestamp } from "@/lib/format";
+import { useIncident } from "../layout";
 
 const itemVariants = {
 	hidden: { opacity: 0, y: 10 },
@@ -21,59 +17,14 @@ const itemVariants = {
 };
 
 export default function PipelinePage() {
-	const params = useParams<{ id: string }>();
-	const incidentId = params?.id ?? "unknown";
-	const uploadedPipeline = usePipeline();
-	const [apiPipeline, setApiPipeline] = useState<EventPipeline | null>(null);
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		async function fetchIncident() {
-			try {
-				const res = await fetch(`/api/incidents/${incidentId}`);
-				if (res.ok) {
-					const data = await res.json();
-					setApiPipeline(data);
-				}
-			} catch (err) {
-				console.error("Error fetching incident for pipeline page:", err);
-			} finally {
-				setLoading(false);
-			}
-		}
-		fetchIncident();
-	}, [incidentId]);
-
-	const pipeline = useMemo(
-		() => apiPipeline || getPipelineById(incidentId, uploadedPipeline),
-		[apiPipeline, incidentId, uploadedPipeline]
-	);
-
-	if (loading) {
-		return (
-			<div className="flex items-center justify-center min-h-screen bg-slate-950 font-mono text-xs text-slate-500">
-				Loading incident data…
-			</div>
-		);
-	}
+	const { pipeline } = useIncident();
 
 	return (
 		<motion.div
-			className="min-h-screen bg-slate-950"
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
 		>
-			{/* Sticky Header */}
-			<motion.div variants={itemVariants} className="sticky top-0 z-30">
-				<AlertSummaryPanel pipeline={pipeline} status="Open" onStatusChange={() => {}} onAction={() => {}} />
-			</motion.div>
-
-			{/* Navigation Tabs */}
-			<motion.div variants={itemVariants}>
-				<IncidentNavTabs incidentId={incidentId} />
-			</motion.div>
-
 			{/* Split Screen View */}
 			<motion.div
 				initial={{ opacity: 0 }}
@@ -92,7 +43,7 @@ export default function PipelinePage() {
 						</div>
 						<div className="mt-4 pt-4 border-t border-slate-700/50 text-xs text-slate-500">
 							<p>Event ID: {pipeline?.event_id}</p>
-							<p>Ingestion Time: 2026-04-07T14:32:15Z</p>
+							<p>Ingestion Time: {formatTimestamp(pipeline?.ingestion?.timestamp ?? pipeline?.raw_event?.timestamp)}</p>
 						</div>
 					</div>
 

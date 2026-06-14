@@ -1,56 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { getPipelineById, EventPipeline } from "@/lib/mockData";
-import { usePipeline } from "@/hooks/usePipeline";
-import AlertSummaryPanel from "@/components/cards/AlertSummaryPanel";
 import CardBlock from "@/components/cards/CardBlock";
 import ReportCard from "@/components/cards/ReportCard";
 import CVSSCard from "@/components/cards/CVSSCard";
+import { useIncident } from "../layout";
 
 export default function ReportPage() {
-	const params = useParams<{ id: string }>();
-	const incidentId = params?.id ?? "unknown";
-	const uploadedPipeline = usePipeline();
-	const [apiPipeline, setApiPipeline] = useState<EventPipeline | null>(null);
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		async function fetchIncident() {
-			try {
-				const res = await fetch(`/api/incidents/${incidentId}`);
-				if (res.ok) {
-					const data = await res.json();
-					setApiPipeline(data);
-				}
-			} catch (err) {
-				console.error("Error fetching incident for report page:", err);
-			} finally {
-				setLoading(false);
-			}
-		}
-		fetchIncident();
-	}, [incidentId]);
-
-	const pipeline = useMemo(
-		() => apiPipeline || getPipelineById(incidentId, uploadedPipeline),
-		[apiPipeline, incidentId, uploadedPipeline]
-	);
-
-	if (loading) {
-		return (
-			<div className="flex items-center justify-center py-24 font-mono text-xs text-slate-500">
-				Loading incident data…
-			</div>
-		);
-	}
+	const { pipeline } = useIncident();
 
 	return (
-		<div className="space-y-8">
-			<AlertSummaryPanel pipeline={pipeline} status="Investigating" />
+		<div className="space-y-8 px-6 py-6">
 			<div className="grid grid-cols-1 gap-8 md:grid-cols-2">
 				<div className="space-y-6">
 					<ReportCard pipeline={pipeline} />
@@ -64,16 +23,6 @@ export default function ReportPage() {
 						</ul>
 					</CardBlock>
 					<CVSSCard pipeline={pipeline} />
-					<CardBlock title="Navigation" tag="DEEP DIVE">
-						<div className="grid gap-3">
-							<Link href={`/incident/${incidentId}`}>
-								<Button variant="secondary" className="w-full">Back to Incident</Button>
-							</Link>
-							<Link href={`/incident/${incidentId}/response`}>
-								<Button variant="outline" className="w-full">Go to Response</Button>
-							</Link>
-						</div>
-					</CardBlock>
 				</div>
 			</div>
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { saveSimulatedEvents, clearSimulatedEvents, readSimulatedEvents } from "@/lib/mockData";
+import { formatTimeOnly } from "@/lib/format";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -14,6 +16,101 @@ function uuid() {
 function randInt(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function randIp(prefix = "192.168") { return `${prefix}.${randInt(1, 254)}.${randInt(1, 254)}`; }
 function now(offsetMs = 0) { return new Date(Date.now() + offsetMs).toISOString(); }
+
+// ─── Client-side log-file validation ─────────────────────────────────────────
+// Catch obvious problems (wrong type, empty, malformed JSON, non-event shape)
+// before paying for a full server round-trip through Layers 1-6. The live
+// backend's POST /run-pipeline accepts JSON content only: a single object, an
+// array of objects, or an `{ "events": [...] }` wrapper — so we mirror exactly
+// that here. Returns the parsed event count on success, or throws with a
+// human-readable reason on failure.
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB — matches the backend cap
+const ACCEPTED_EXTENSIONS = [".json", ".jsonl", ".ndjson", ".csv"];
+
+async function validateLogFile(file: File): Promise<number> {
+  const lower = file.name.toLowerCase();
+  if (!ACCEPTED_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
+    throw new Error(
+      `Unsupported file type "${file.name}". Upload a .json, .jsonl/.ndjson, or .csv log file.`,
+    );
+  }
+  if (file.size === 0) {
+    throw new Error("File is empty. Provide a non-empty log file.");
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error(
+      `File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum is 10 MB.`,
+    );
+  }
+
+  const text = await file.text();
+  if (!text.trim()) {
+    throw new Error("File is empty. Provide a non-empty log file.");
+  }
+
+  // CSV: defer structural validation to the backend parser; just require a
+  // header row plus at least one data row.
+  if (lower.endsWith(".csv")) {
+    const rows = text.split(/\r?\n/).filter((l) => l.trim());
+    if (rows.length < 2) {
+      throw new Error("CSV file needs a header row plus at least one data row.");
+    }
+    return rows.length - 1;
+  }
+
+  // JSONL / NDJSON: every non-empty line must be a JSON object.
+  if (lower.endsWith(".jsonl") || lower.endsWith(".ndjson")) {
+    const lines = text.split(/\r?\n/).filter((l) => l.trim());
+    if (lines.length === 0) {
+      throw new Error("No log events found in the file.");
+    }
+    lines.forEach((line, i) => {
+      let obj: unknown;
+      try {
+        obj = JSON.parse(line);
+      } catch {
+        throw new Error(`Invalid JSON on line ${i + 1} of the .jsonl file.`);
+      }
+      if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
+        throw new Error(`Line ${i + 1} of the .jsonl file must be a JSON object.`);
+      }
+    });
+    return lines.length;
+  }
+
+  // JSON: array, {events:[...]} wrapper, or a single object.
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error(
+      "File is not valid JSON. Expected a JSON array of log event objects, " +
+        'e.g. [{ "timestamp": …, "log_type": …, "source_ip": …, "action": … }].',
+    );
+  }
+
+  // Normalise to an array of event records, mirroring the backend parser:
+  //   {events:[...]} wrapper → its events;  bare object → [object];  array → as-is.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let events: any[];
+  if (Array.isArray(parsed)) {
+    events = parsed;
+  } else if (parsed && typeof parsed === "object") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const maybeWrapper = (parsed as any).events;
+    events = Array.isArray(maybeWrapper) ? maybeWrapper : [parsed];
+  } else {
+    throw new Error("JSON must be an object or an array of log event objects.");
+  }
+
+  if (events.length === 0) {
+    throw new Error("No log events found. Provide a non-empty JSON array of events.");
+  }
+  if (!events.every((e) => e && typeof e === "object" && !Array.isArray(e))) {
+    throw new Error("Every log entry must be a JSON object.");
+  }
+  return events.length;
+}
 
 // ─── SOC Pipeline Layers ─────────────────────────────────────────────────────
 
@@ -529,6 +626,7 @@ type HistoryCount = number;
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function UploadPage() {
+  const router = useRouter();
   const [selected, setSelected] = useState<AttackConfig | null>(null);
   const [phase, setPhase]       = useState<Phase>("idle");
   const [logLines, setLogLines]  = useState<LogLine[]>([]);
@@ -537,6 +635,17 @@ export default function UploadPage() {
   const [eventCount, setEventCount] = useState(0);
   const [historyCount, setHistoryCount] = useState<HistoryCount>(0);
   const logEndRef = useRef<HTMLDivElement>(null);
+
+  // ─── Real log-file ingestion (drives the actual backend L1-L6 pipeline) ───
+  type RealPhase = "idle" | "running" | "done" | "error";
+  const [realFile, setRealFile] = useState<File | null>(null);
+  const [realPhase, setRealPhase] = useState<RealPhase>("idle");
+  const [realMsg, setRealMsg] = useState("");
+  const [clearFirst, setClearFirst] = useState(true);
+  // Real ingestion has its own layer state so the live-pipeline graphic never
+  // shows stale progress left over from a prior demo simulation (and vice-versa).
+  const [realLayerStates, setRealLayerStates] = useState<LayerState[]>(PIPELINE_LAYERS.map(() => "waiting"));
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { logEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [logLines]);
 
@@ -590,7 +699,7 @@ export default function UploadPage() {
         ...prev,
         {
           id: i,
-          ts: new Date(re.timestamp ?? Date.now()).toLocaleTimeString(),
+          ts: formatTimeOnly(re.timestamp ?? Date.now()),
           type: re.log_type ?? "network",
           src: re.source_ip ?? "unknown",
           dst: re.destination_ip ?? re.affected_host ?? undefined,
@@ -618,24 +727,110 @@ export default function UploadPage() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       // Merge into accumulated history (does NOT overwrite previous runs)
-      saveSimulatedEvents(events as any[]);
+      const localSaved = saveSimulatedEvents(events as any[]);
       const newTotal = readSimulatedEvents().length;
       setHistoryCount(newTotal);
 
-      // Also write to public/frontend_output.json via API route (non-critical)
+      // Persist to the backend DB (the authoritative source the dashboard reads).
       await fetch("/api/simulate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ events }),
-      }).catch(() => { /* non-critical: localStorage is the primary path */ });
+      }).catch(() => { /* non-critical: persisted on dashboard load too */ });
 
       setPhase("done");
-      setStatusMsg(`✅ ${events.length} new incidents added — ${newTotal} total in dashboard — redirecting…`);
+      const note = localSaved ? "" : " (local cache full — history trimmed)";
+      setStatusMsg(`✅ ${events.length} new incidents added — ${newTotal} total in dashboard${note} — redirecting…`);
       await sleep(1800);
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
     } catch (err) {
       setPhase("error");
       setStatusMsg(err instanceof Error ? err.message : "Write failed");
+    }
+  }
+
+  // ─── Real ingestion: send the uploaded log file through the real pipeline ──
+  async function runRealIngest() {
+    if (!realFile || realPhase === "running") return;
+
+    // 1. Pre-flight: validate the picked file locally so obvious errors
+    //    (wrong type, empty, malformed JSON, non-event shape) give immediate
+    //    feedback instead of a full Layers 1-6 round-trip. Crucially this runs
+    //    BEFORE any destructive clear, so a bad file can never wipe history.
+    try {
+      await validateLogFile(realFile);
+    } catch (err) {
+      setRealPhase("error");
+      setRealLayerStates(PIPELINE_LAYERS.map(() => "waiting"));
+      setRealMsg(err instanceof Error ? err.message : "File validation failed");
+      return;
+    }
+
+    setRealPhase("running");
+    setRealLayerStates(PIPELINE_LAYERS.map(() => "running"));
+    setRealMsg(`Uploading ${realFile.name} → running Layers 1-6 on the server…`);
+
+    // Snapshot of the incidents we cleared, kept so we can restore them if the
+    // upload then fails (H8 — never lose existing data on a failed pipeline).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let clearedSnapshot: any[] | null = null;
+
+    try {
+      // 2. The backend's /run-pipeline APPENDS to the incident store (it does
+      //    not replace it), so "clear first" means we must DELETE before the
+      //    run. To make that non-destructive on failure we first snapshot the
+      //    existing incidents, then DELETE, and restore the snapshot in catch.
+      if (clearFirst) {
+        try {
+          const snapRes = await fetch("/api/incidents", { cache: "no-store" });
+          if (snapRes.ok) {
+            const snap = await snapRes.json().catch(() => null);
+            if (Array.isArray(snap)) clearedSnapshot = snap;
+          }
+        } catch { /* snapshot is best-effort; absence just means nothing to restore */ }
+        await fetch("/api/incidents", { method: "DELETE" }).catch(() => {});
+      }
+
+      const form = new FormData();
+      form.append("file", realFile, realFile.name);
+
+      const res = await fetch("/api/run-pipeline", { method: "POST", body: form });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || data?.status !== "success") {
+        const detail = data?.message || data?.error || `HTTP ${res.status}`;
+        throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+      }
+
+      // 3. Success — the new incidents are persisted server-side. Now it is
+      //    safe to drop the local demo history so the dashboard shows ONLY
+      //    this file's results.
+      if (clearFirst) clearSimulatedEvents();
+
+      const count = Number(data?.events ?? 0);
+      setRealLayerStates(PIPELINE_LAYERS.map(() => "done"));
+      setRealPhase("done");
+      setRealMsg(`✅ Pipeline complete — ${count} incident${count === 1 ? "" : "s"} generated from ${realFile.name}. Redirecting…`);
+
+      await sleep(1600);
+      router.push("/dashboard");
+    } catch (err) {
+      // Restore the incidents we cleared so a failed upload causes no data loss.
+      if (clearedSnapshot && clearedSnapshot.length > 0) {
+        await fetch("/api/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ events: clearedSnapshot }),
+        }).catch(() => { /* best-effort restore */ });
+      }
+      setRealPhase("error");
+      setRealLayerStates(PIPELINE_LAYERS.map(() => "waiting"));
+      const baseMsg = err instanceof Error ? err.message : "Ingestion failed";
+      setRealMsg(
+        clearedSnapshot && clearedSnapshot.length > 0
+          ? `${baseMsg} (existing incidents were restored)`
+          : baseMsg,
+      );
     }
   }
 
@@ -659,9 +854,9 @@ export default function UploadPage() {
       <div className="rounded-xl border border-slate-700/80 bg-slate-900/60 p-6 shadow-lg">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-slate-100">🧪 Attack Simulation Lab</h1>
+            <h1 className="text-2xl font-bold text-slate-100">🛰️ Log Ingestion &amp; Attack Simulation</h1>
             <p className="mt-1 text-sm text-slate-400">
-              Select an attack — logs stream in real-time through all 6 SOC pipeline layers, then populate the dashboard with full incident reports.
+              Upload a real log file to run it through the live 6-layer SOC pipeline (Layers 1-6), or launch a built-in attack scenario for a demo.
             </p>
             {historyCount > 0 && phase === "idle" && (
               <p className="mt-1.5 text-xs text-slate-500">
@@ -687,8 +882,98 @@ export default function UploadPage() {
         </div>
       </div>
 
-      {/* Attack Grid */}
+      {/* ── Real Log Ingestion (drives the actual backend pipeline) ── */}
       {phase === "idle" && (
+        <div className="rounded-xl border border-cyan-700/50 bg-gradient-to-br from-cyan-950/30 via-slate-900/60 to-slate-900/60 p-6 shadow-lg">
+          <div className="flex items-center gap-2.5 mb-1">
+            <span className="text-xl">📥</span>
+            <h2 className="text-lg font-bold text-slate-100">Real Log Ingestion</h2>
+            <span className="rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-cyan-300">Live Pipeline</span>
+          </div>
+          <p className="mb-4 text-xs text-slate-400">
+            Upload a <code className="rounded bg-slate-800 px-1 text-cyan-300">.json</code>, <code className="rounded bg-slate-800 px-1 text-cyan-300">.jsonl</code>, or <code className="rounded bg-slate-800 px-1 text-cyan-300">.csv</code> log file. It is sent to
+            <code className="mx-1 rounded bg-slate-800 px-1 text-cyan-300">POST /run-pipeline</code> and processed by all six layers (Feature Engineering → Detection → CIS → AI Analysis → CVSS → Response), then persisted and shown on the dashboard.
+            Expected format: log events with fields like <span className="text-slate-300">timestamp, log_type, source_ip, action, …</span> (a JSON array, newline-delimited JSON, or CSV with a header row).
+            The file is validated in your browser first, so obvious problems are caught before the pipeline runs.
+          </p>
+
+          {realPhase === "idle" || realPhase === "error" ? (
+            <div className="space-y-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,.jsonl,.ndjson,.csv,application/json,text/csv"
+                  onChange={(e) => { setRealFile(e.target.files?.[0] ?? null); setRealPhase("idle"); setRealMsg(""); }}
+                  className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:px-4 file:py-2 file:text-xs file:font-bold file:text-slate-950 hover:file:bg-cyan-500 file:cursor-pointer cursor-pointer rounded-lg border border-slate-700/60 bg-slate-950/60 p-2"
+                />
+                <button
+                  onClick={runRealIngest}
+                  disabled={!realFile}
+                  className="shrink-0 rounded-lg bg-cyan-500 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.25)] transition hover:bg-cyan-400 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
+                >
+                  ▶ Run SOC Pipeline
+                </button>
+              </div>
+
+              <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
+                <input type="checkbox" checked={clearFirst} onChange={(e) => setClearFirst(e.target.checked)} className="h-3.5 w-3.5 accent-cyan-500" />
+                Clear existing incidents first (show only this file&apos;s results)
+              </label>
+
+              {realFile && (
+                <p className="text-xs text-slate-500">Selected: <span className="font-mono text-slate-300">{realFile.name}</span> ({(realFile.size / 1024).toFixed(1)} KB)</p>
+              )}
+
+              {realPhase === "error" && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">
+                  ⚠️ {realMsg}
+                  <div className="mt-1 text-red-400/70">Provide a non-empty <span className="font-mono">.json</span> / <span className="font-mono">.jsonl</span> / <span className="font-mono">.csv</span> file of log event records, and ensure the backend is running on port 8000.</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Live pipeline progress (driven by the real backend response) */}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                {PIPELINE_LAYERS.map((layer, idx) => {
+                  const state = realLayerStates[idx];
+                  const isDone = state === "done";
+                  const isRunning = state === "running";
+                  return (
+                    <div key={layer.id} className={`rounded-lg border px-3 py-2.5 transition-all duration-500 ${
+                      isDone ? "border-emerald-500/30 bg-emerald-950/30" : isRunning ? "border-cyan-500/40 bg-cyan-950/20" : "border-slate-700/40 bg-slate-900/40"
+                    }`}>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm">{isDone ? "✅" : isRunning ? "⏳" : "⬜"}</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isDone ? "text-emerald-400" : isRunning ? "text-cyan-300" : "text-slate-600"}`}>{layer.label}</span>
+                      </div>
+                      <p className="mt-0.5 text-[10px] text-slate-500 leading-tight">{layer.sub}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className={`flex items-center justify-between text-xs ${
+                realPhase === "done" ? "text-emerald-400" : "text-cyan-300"
+              }`}>
+                <span className="flex items-center gap-2">
+                  {realPhase === "running" && <span className="inline-block h-2 w-2 rounded-full bg-cyan-400 animate-ping" />}
+                  {realMsg}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Attack Grid (demo / simulated incidents — not the live pipeline) */}
+      {phase === "idle" && realPhase === "idle" && (
+        <div>
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-base">🧪</span>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Demo · Attack Simulation</h2>
+            <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-300">Simulated</span>
+          </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {ATTACKS.map((atk) => (
             <button key={atk.id} onClick={() => runSim(atk)}
@@ -707,6 +992,7 @@ export default function UploadPage() {
               </div>
             </button>
           ))}
+        </div>
         </div>
       )}
 
